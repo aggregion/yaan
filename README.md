@@ -19,7 +19,7 @@ One of the main goals for which YAAN was created is the ability to minimize manu
 
 Example workflow:
 
-![example workflow](https://storage.aggregion.com/api/files/3b93a4139cf8ab89a6d1f03fe6e5ab246258f1fce2d5144b570a1ebf729afbf7/shared/data)
+![example workflow](./docs/images/workflow-example.jpg)
 
 
 ## YAAN notation documentation
