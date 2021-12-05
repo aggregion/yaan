@@ -55,7 +55,8 @@
   "repository": "aggregion/yaan",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
-    "posttest": "eslint . --ext .ts --fix",
+    "posttest": "eslint . --ext .ts",
+    "eslint:fix": "eslint . --ext .ts --fix",
     "prepack": "rm -rf lib && tsc -b tsconfig.build.json && oclif-dev manifest && oclif-dev readme && npm run schema && npx cpy schema.json lib",
     "version": "oclif-dev readme && git add README.md",
     "schema": "ts-json-schema-generator --strict-tuples -t ConfigContainer -p 'src/common/schemas/configContainer.ts' -o schema.json",
