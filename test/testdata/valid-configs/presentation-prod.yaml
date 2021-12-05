@@ -1,0 +1,10 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Presentation
+metadata:
+  name: prod
+
+spec:
+  title: "Production environment presentation"
+  deployments:
+    - name: prod
+      externalConnectionsPolicy: Mask  # Show external connections, but mask them deployment details

@@ -2,7 +2,6 @@ apiVersion: yaan.aggregion.com/v1
 kind: Server
 metadata:
   name: k8s-master
-  namespace: client
 
 spec:
   title: "K8S Master Nodes"

@@ -1,23 +1,23 @@
 apiVersion: yaan.aggregion.com/v1
 kind: Server
 metadata:
-  name: db
-  namespace: client
+  name: k8s-worker
 
 spec:
   title: "Worker Pool"
   description: ""
   provider: azure
   type: virtual
-  osType: "Linux"
-  osName: "Ubuntu 20.04"
+  pool:
+    minScale: 1
+    maxScale: 5
   hardware:
     cpus:
       - cores: 32
         model: "Intel Xeon Gold 6336Y"
-    memory: 512Gi
+    memory: 128Gi
     disks:
-      - size: 2Ti
+      - size: 500Gi
         mountPoint: "/dev/sda"
   firewall:
     inboundPorts:

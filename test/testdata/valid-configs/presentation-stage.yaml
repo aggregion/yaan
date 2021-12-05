@@ -1,0 +1,10 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Presentation
+metadata:
+  name: stage
+
+spec:
+  title: "Production environment presentation"
+  deployments:
+    - name: stage
+      externalConnectionsPolicy: Show # Automatically include external connections deployments

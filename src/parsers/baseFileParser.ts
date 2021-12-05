@@ -1,67 +1,73 @@
-import { Parser, Project } from '../common/types';
+import { Parser, ProjectContainer } from '../common/types';
 import fs from 'fs';
 import path from 'path';
 import { ConfigContainer } from '../common/schemas/configContainer';
 import Ajv from 'ajv';
 import YAML from 'yaml';
+import { Project } from '../common/project';
 
 export abstract class BaseFileParser implements Parser {
     protected readonly jsonSchema: any;
+    private readonly ajv = new Ajv();
 
     constructor() {
         this.jsonSchema = JSON.parse(
             fs.readFileSync(path.join(__dirname, '../../schema.json'), 'utf8'),
         );
+        this.ajv.addSchema(this.jsonSchema);
     }
 
     protected abstract parseData(data: Buffer | string): any;
 
-    parse(data: (string | Buffer)[], names: string[] = []): Project {
-        const kindMap: any = {
-            Solution: 'solutions',
-        };
-        const project: Project = {
-            solutions: [],
-        };
+    private validateSchema(data: any, entityName: string, fileName: string) {
+        const validate = this.ajv.getSchema(`#/definitions/${entityName}`);
+        if (!validate) {
+            throw new Error(`Can't find definition of ${entityName} in schema`);
+        }
+        const valid = validate(data);
+        if (!valid) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const errorsPrettified = validate
+                .errors!.map(
+                    (e, i) =>
+                        `Error #${i + 1}:\n${YAML.stringify(e)
+                            .split('\n')
+                            .map((s) => '  ' + s)
+                            .join('\n')}`,
+                )
+                .join('\n');
+            throw new Error(
+                `Schema validation error${
+                    fileName ? ` for "${fileName}"` : ''
+                }:\n${errorsPrettified}`,
+            );
+        }
+    }
+
+    parse(data: (string | Buffer)[], names: string[] = []): ProjectContainer {
+        const project = new Project();
         for (let i = 0; i < data.length; i++) {
             const configData = data[i];
             const container = this.parseData(configData) as ConfigContainer;
-            const ajv = new Ajv();
-            ajv.addSchema(this.jsonSchema);
-            const validate = ajv.getSchema('#/definitions/ConfigContainer');
-            if (!validate) {
-                throw new Error(
-                    `Can't find definition of ConfigContainer in schema`,
-                );
-            }
-            const valid = validate(container);
-            if (!valid) {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                const errorsPrettified = validate
-                    .errors!.map(
-                        (e, i) =>
-                            `Error #${i + 1}:\n${YAML.stringify(e)
-                                .split('\n')
-                                .map((s) => '  ' + s)
-                                .join('\n')}`,
-                    )
-                    .join('\n');
-                throw new Error(
-                    `Schema validation error${
-                        names[i] ? ` for "${names[i]}"` : ''
-                    }:\n${errorsPrettified}`,
-                );
-            }
-            const kindProp = kindMap[container.kind];
-            if (!project.hasOwnProperty(kindProp)) {
-                throw new Error(`Unknown kind: ${container.kind}`);
-            }
-            (project as any)[kindMap[container.kind]].push(container.spec);
+
+            this.validateSchema(
+                container,
+                'CommonConfigContainerAttributes',
+                names[i],
+            );
+
+            this.validateSchema(container.spec, container.kind, names[i]);
+
+            project.set(
+                container.kind,
+                container.metadata.name,
+                container.spec,
+            );
         }
         return project;
     }
 
-    parseFiles(files: string[]): Project {
+    parseFiles(files: string[]): ProjectContainer {
         return this.parse(
             files.map((fileName) => fs.readFileSync(fileName, 'utf8')),
             files,

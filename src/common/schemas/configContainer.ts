@@ -3,20 +3,40 @@ import { KubernetesCluster } from './kubernetesCluster';
 import { Provider } from './provider';
 import { Server } from './server';
 import { Deployment } from './deployment';
+import { Presentation } from './presentation';
+
+export enum EntityType {
+    Solution = 'Solution',
+    KubernetesCluster = 'KubernetesCluster',
+    Provider = 'Provider',
+    Server = 'Server',
+    Deployment = 'Deployment',
+    Presentation = 'Presentation',
+}
+
+export interface EntityTypeBinding {
+    Solution: Solution;
+    KubernetesCluster: KubernetesCluster;
+    Provider: Provider;
+    Server: Server;
+    Deployment: Deployment;
+    Presentation: Presentation;
+}
 
 export interface CommonConfigContainerAttributes {
     apiVersion: string;
+    kind: EntityType;
     metadata: {
         name: string;
-        title: string;
     };
+    spec: any;
 }
 
 /**
  * Describes application solution with it's components
  */
 export interface SolutionContainer extends CommonConfigContainerAttributes {
-    kind: 'Solution';
+    kind: EntityType.Solution;
     spec: Solution;
 }
 
@@ -25,7 +45,7 @@ export interface SolutionContainer extends CommonConfigContainerAttributes {
  */
 export interface KubernetesClusterContainer
     extends CommonConfigContainerAttributes {
-    kind: 'KubernetesCluster';
+    kind: EntityType.KubernetesCluster;
     spec: KubernetesCluster;
 }
 
@@ -33,7 +53,7 @@ export interface KubernetesClusterContainer
  * Describes provider like AWS, Google Cloud etc.
  */
 export interface ProviderContainer extends CommonConfigContainerAttributes {
-    kind: 'Provider';
+    kind: EntityType.Provider;
     spec: Provider;
 }
 
@@ -41,7 +61,7 @@ export interface ProviderContainer extends CommonConfigContainerAttributes {
  * Describes specific server or server's pool
  */
 export interface ServerContainer extends CommonConfigContainerAttributes {
-    kind: 'Server';
+    kind: EntityType.Server;
     spec: Server;
 }
 
@@ -49,8 +69,16 @@ export interface ServerContainer extends CommonConfigContainerAttributes {
  * Describes deployment
  */
 export interface DeploymentContainer extends CommonConfigContainerAttributes {
-    kind: 'Deployment';
+    kind: EntityType.Deployment;
     spec: Deployment;
+}
+
+/**
+ * Describes presentation view
+ */
+export interface PresentationContainer extends CommonConfigContainerAttributes {
+    kind: EntityType.Presentation;
+    spec: Presentation;
 }
 
 export type ConfigContainer =
@@ -58,4 +86,5 @@ export type ConfigContainer =
     | KubernetesClusterContainer
     | ProviderContainer
     | ServerContainer
-    | DeploymentContainer;
+    | DeploymentContainer
+    | PresentationContainer;

@@ -65,6 +65,11 @@ export interface SolutionComponent {
 
 export interface Solution {
     /**
+     * Human readable title of solution
+     */
+    title: string;
+
+    /**
      * Solution components like services, databases, queues etc.
      */
     components?: Record<string, SolutionComponent>;

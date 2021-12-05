@@ -1,0 +1,24 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Deployment
+metadata:
+  name: stage
+
+spec:
+  title: "Client Stage Deployment"
+  deploymentGroups:
+    stage:
+      type: KubernetesCluster
+      cluster: k8s
+      clusterNamespace: prod
+      solution: myapp
+      components:
+        - '*' # include all components from solution
+        - name: backend
+          externalConnections:
+            - deployment: common
+              deploymentGroup: db
+              component: clickHouse # connect to clickHouse component from specific deployment and  deploymentGroup
+        - mongo
+        - rabbitMQ
+        - name: blockchainNode
+          disabled: true

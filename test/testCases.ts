@@ -1,27 +1,32 @@
 import path from 'path';
+import glob from 'glob';
 import { Parser } from '../src/common/types';
 
-const testData: Record<string, string> = {};
+export const runTestCases = (
+    validFilesGlob: string,
+    invalidFilesGlob: string,
+    parser: Parser,
+) => {
+    const validFiles = glob.sync(
+        path.join(__dirname, 'testdata', validFilesGlob),
+    );
 
-[
-    'valid-deployment/solution-myapp',
-    'solution1_inv_kind',
-    'solution1_inv_volume',
-].forEach(
-    (name) =>
-        (testData[name] = path.join(__dirname, 'testdata', name + '.yaml')),
-);
+    const invalidFiles = glob.sync(
+        path.join(__dirname, 'testdata', invalidFilesGlob),
+    );
 
-export const runTestCases = (parser: Parser) => {
-    it('should validate schema', () => {
-        expect(() =>
-            parser.parseFiles([testData['valid-deployment/solution-myapp']]),
-        ).not.toThrow();
-        expect(() =>
-            parser.parseFiles([testData['solution1_inv_kind']]),
-        ).toThrow();
-        expect(() =>
-            parser.parseFiles([testData['solution1_inv_volume']]),
-        ).toThrow();
+    test('should accept valid files', () => {
+        for (const file of validFiles) {
+            expect(
+                () => parser.parseFiles([file]),
+                `File: ${file}`,
+            ).not.toThrow();
+        }
+    });
+
+    test('should not accept invalid files', () => {
+        for (const file of invalidFiles) {
+            expect(() => parser.parseFiles([file]), `File: ${file}`).toThrow();
+        }
     });
 };

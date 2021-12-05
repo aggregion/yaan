@@ -2,7 +2,6 @@ apiVersion: yaan.aggregion.com/v1
 kind: KubernetesCluster
 metadata:
   name: prod
-  namespace: client
 
 spec:
   title: "K8SCluster"

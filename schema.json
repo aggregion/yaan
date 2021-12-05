@@ -1,7 +1,37 @@
 {
-  "$ref": "#/definitions/ConfigContainer",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
+    "CommonConfigContainerAttributes": {
+      "additionalProperties": false,
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/definitions/EntityType"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "type": "object"
+        },
+        "spec": {}
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
     "ConfigContainer": {
       "anyOf": [
         {
@@ -18,6 +48,9 @@
         },
         {
           "$ref": "#/definitions/DeploymentContainer"
+        },
+        {
+          "$ref": "#/definitions/PresentationContainer"
         }
       ]
     },
@@ -53,6 +86,9 @@
         {
           "const": "*",
           "type": "string"
+        },
+        {
+          "type": "string"
         }
       ]
     },
@@ -60,7 +96,8 @@
       "additionalProperties": false,
       "properties": {
         "disabled": {
-          "not": {}
+          "const": false,
+          "type": "boolean"
         },
         "externalConnections": {
           "items": {
@@ -83,9 +120,13 @@
         "disabled": {
           "const": true,
           "type": "boolean"
+        },
+        "name": {
+          "type": "string"
         }
       },
       "required": [
+        "name",
         "disabled"
       ],
       "type": "object"
@@ -106,14 +147,10 @@
           "properties": {
             "name": {
               "type": "string"
-            },
-            "title": {
-              "type": "string"
             }
           },
           "required": [
-            "name",
-            "title"
+            "name"
           ],
           "type": "object"
         },
@@ -160,6 +197,49 @@
         }
       ]
     },
+    "EntityType": {
+      "enum": [
+        "Solution",
+        "KubernetesCluster",
+        "Provider",
+        "Server",
+        "Deployment",
+        "Presentation"
+      ],
+      "type": "string"
+    },
+    "EntityTypeBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "Deployment": {
+          "$ref": "#/definitions/Deployment"
+        },
+        "KubernetesCluster": {
+          "$ref": "#/definitions/KubernetesCluster"
+        },
+        "Presentation": {
+          "$ref": "#/definitions/Presentation"
+        },
+        "Provider": {
+          "$ref": "#/definitions/Provider"
+        },
+        "Server": {
+          "$ref": "#/definitions/Server"
+        },
+        "Solution": {
+          "$ref": "#/definitions/Solution"
+        }
+      },
+      "required": [
+        "Solution",
+        "KubernetesCluster",
+        "Provider",
+        "Server",
+        "Deployment",
+        "Presentation"
+      ],
+      "type": "object"
+    },
     "KubernetesCluster": {
       "additionalProperties": false,
       "properties": {
@@ -198,14 +278,10 @@
           "properties": {
             "name": {
               "type": "string"
-            },
-            "title": {
-              "type": "string"
             }
           },
           "required": [
-            "name",
-            "title"
+            "name"
           ],
           "type": "object"
         },
@@ -267,6 +343,93 @@
       ],
       "type": "object"
     },
+    "Presentation": {
+      "additionalProperties": false,
+      "properties": {
+        "deployments": {
+          "items": {
+            "$ref": "#/definitions/PresentationDeployment"
+          },
+          "type": "array"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "deployments"
+      ],
+      "type": "object"
+    },
+    "PresentationContainer": {
+      "additionalProperties": false,
+      "description": "Describes presentation view",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "Presentation",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "type": "object"
+        },
+        "spec": {
+          "$ref": "#/definitions/Presentation"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
+    "PresentationDeployment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/definitions/PresentationDeploymentDetailed"
+        }
+      ]
+    },
+    "PresentationDeploymentDetailed": {
+      "additionalProperties": false,
+      "properties": {
+        "externalConnectionsPolicy": {
+          "$ref": "#/definitions/PresentationExternalConnectionsPolicy"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "PresentationExternalConnectionsPolicy": {
+      "enum": [
+        "Show",
+        "Hide",
+        "Mask"
+      ],
+      "type": "string"
+    },
     "Provider": {
       "additionalProperties": false,
       "properties": {
@@ -298,14 +461,10 @@
           "properties": {
             "name": {
               "type": "string"
-            },
-            "title": {
-              "type": "string"
             }
           },
           "required": [
-            "name",
-            "title"
+            "name"
           ],
           "type": "object"
         },
@@ -388,14 +547,10 @@
           "properties": {
             "name": {
               "type": "string"
-            },
-            "title": {
-              "type": "string"
             }
           },
           "required": [
-            "name",
-            "title"
+            "name"
           ],
           "type": "object"
         },
@@ -585,8 +740,15 @@
           },
           "description": "Solution components like services, databases, queues etc.",
           "type": "object"
+        },
+        "title": {
+          "description": "Human readable title of solution",
+          "type": "string"
         }
       },
+      "required": [
+        "title"
+      ],
       "type": "object"
     },
     "SolutionComponent": {
@@ -684,14 +846,10 @@
           "properties": {
             "name": {
               "type": "string"
-            },
-            "title": {
-              "type": "string"
             }
           },
           "required": [
-            "name",
-            "title"
+            "name"
           ],
           "type": "object"
         },

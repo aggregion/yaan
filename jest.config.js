@@ -1,5 +1,6 @@
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    rootDir: 'test'
+    rootDir: 'test',
+    setupFilesAfterEnv: ['@alex_neo/jest-expect-message'],
 };

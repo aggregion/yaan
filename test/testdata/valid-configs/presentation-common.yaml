@@ -1,0 +1,9 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Presentation
+metadata:
+  name: common
+
+spec:
+  title: "Production environment presentation"
+  deployments:
+    - common

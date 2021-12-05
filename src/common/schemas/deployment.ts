@@ -6,19 +6,21 @@ export interface DeploymentExternalConnection {
 }
 
 export interface DeploymentComponentDetailed {
-    disabled: undefined;
+    disabled?: false;
     name: string;
     externalConnections?: DeploymentExternalConnection[];
 }
 
 export interface DeploymentComponentDisabled {
+    name: string;
     disabled: true;
 }
 
 export type DeploymentComponent =
     | DeploymentComponentDetailed
     | DeploymentComponentDisabled
-    | '*';
+    | '*'
+    | string;
 
 interface CommonDeploymentGroupProps {
     solution: string;
