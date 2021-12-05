@@ -19,7 +19,7 @@ One of the main goals for which YAAN was created is the ability to minimize manu
 
 Example workflow:
 
-![example workflow](./docs/images/workflow-example.jpg)
+![example workflow](./docs/images/workflow-example2.jpg)
 
 
 ## YAAN notation documentation
