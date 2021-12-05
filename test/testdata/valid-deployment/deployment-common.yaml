@@ -1,0 +1,14 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Deployment
+metadata:
+  name: common
+  namespace: client
+
+spec:
+  title: "Client Common Deployment"
+  deploymentGroups:
+    db:
+      type: Server
+      server: db
+      components:
+        - clickHouse

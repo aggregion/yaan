@@ -1,0 +1,10 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Provider
+metadata:
+  name: azure
+  namespace: client
+
+spec:
+  title: "Microsoft Azure"
+  description: "Microsoft Azure Cloud"
+

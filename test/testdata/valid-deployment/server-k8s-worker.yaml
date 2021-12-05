@@ -1,0 +1,39 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Server
+metadata:
+  name: k8s-worker
+  namespace: client
+
+spec:
+  title: "Worker Pool"
+  description: ""
+  provider: azure
+  type: virtual
+  pool:
+    minScale: 1
+    maxScale: 5
+  hardware:
+    cpus:
+      - cores: 32
+        model: "Intel Xeon Gold 6336Y"
+    memory: 128Gi
+    disks:
+      - size: 500Gi
+        mountPoint: "/dev/sda"
+  firewall:
+    inboundPorts:
+      nginx: 443
+      node:
+        ports:
+          - 8321
+          - from: 9000
+            to: 9001
+        hosts:
+          - 10.0.3.5
+          - 56.42.14.54
+    outboundPorts:
+      wholeInternet:
+        ports:
+          - 443
+          - 80
+

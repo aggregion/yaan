@@ -1,0 +1,65 @@
+apiVersion: yaan.aggregion.com/v1beta1
+kind: Solution
+metadata:
+  name: myapp
+  title: "DCP"
+
+spec:
+  components:
+    backend:
+      title: "API Server"
+      ports:
+        api: 443
+      uses:
+        - mongo
+        - clickHouse
+        - redis
+        - rabbitMQ
+        - dataService:api
+
+    mongo:
+      title: "MongoDB"
+      ports:
+        main: 27017
+      volumes:
+        data:
+          minSize: 4Gi
+      kind: db
+
+    clickHouse:
+      title: "ClickHouse"
+      ports:
+        main: 27017
+      volumes:
+        data:
+          minSize: 4Gi
+      kind: db
+
+    redis:
+      title: "Redis"
+      ports:
+        main: 6379
+      kind: db
+
+    rabbitMQ:
+      title: "RabbitMQ"
+      ports:
+        main: 5672
+      kind: queue
+
+    smtpServer:
+      title: "SMTP server"
+      ports:
+        main: 587
+
+    dataService:
+      title: "Data Service API"
+      ports:
+        syncer: 8090
+        api: 9045
+      uses:
+        - mongo
+        - rabbitMQ
+        - clickHouse
+
+

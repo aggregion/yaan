@@ -1,0 +1,749 @@
+{
+  "$ref": "#/definitions/ConfigContainer",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ConfigContainer": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/SolutionContainer"
+        },
+        {
+          "$ref": "#/definitions/KubernetesClusterContainer"
+        },
+        {
+          "$ref": "#/definitions/ProviderContainer"
+        },
+        {
+          "$ref": "#/definitions/ServerContainer"
+        },
+        {
+          "$ref": "#/definitions/DeploymentContainer"
+        }
+      ]
+    },
+    "Deployment": {
+      "additionalProperties": false,
+      "properties": {
+        "deploymentGroups": {
+          "additionalProperties": {
+            "$ref": "#/definitions/DeploymentGroup"
+          },
+          "type": "object"
+        },
+        "description": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "type": "object"
+    },
+    "DeploymentComponent": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/DeploymentComponentDetailed"
+        },
+        {
+          "$ref": "#/definitions/DeploymentComponentDisabled"
+        },
+        {
+          "const": "*",
+          "type": "string"
+        }
+      ]
+    },
+    "DeploymentComponentDetailed": {
+      "additionalProperties": false,
+      "properties": {
+        "disabled": {
+          "not": {}
+        },
+        "externalConnections": {
+          "items": {
+            "$ref": "#/definitions/DeploymentExternalConnection"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "DeploymentComponentDisabled": {
+      "additionalProperties": false,
+      "properties": {
+        "disabled": {
+          "const": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "disabled"
+      ],
+      "type": "object"
+    },
+    "DeploymentContainer": {
+      "additionalProperties": false,
+      "description": "Describes deployment",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "Deployment",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "title"
+          ],
+          "type": "object"
+        },
+        "spec": {
+          "$ref": "#/definitions/Deployment"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
+    "DeploymentExternalConnection": {
+      "additionalProperties": false,
+      "properties": {
+        "component": {
+          "type": "string"
+        },
+        "deployment": {
+          "type": "string"
+        },
+        "deploymentGroup": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "component"
+      ],
+      "type": "object"
+    },
+    "DeploymentGroup": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/KubernetesClusterDeploymentGroup"
+        },
+        {
+          "$ref": "#/definitions/ServerDeploymentGroup"
+        }
+      ]
+    },
+    "KubernetesCluster": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "nodes": {
+          "additionalProperties": {
+            "$ref": "#/definitions/KubernetesClusterNode"
+          },
+          "type": "object"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "nodes"
+      ],
+      "type": "object"
+    },
+    "KubernetesClusterContainer": {
+      "additionalProperties": false,
+      "description": "Describes Kubernetes cluster",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "KubernetesCluster",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "title"
+          ],
+          "type": "object"
+        },
+        "spec": {
+          "$ref": "#/definitions/KubernetesCluster"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
+    "KubernetesClusterDeploymentGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "cluster": {
+          "type": "string"
+        },
+        "clusterNamespace": {
+          "type": "string"
+        },
+        "components": {
+          "items": {
+            "$ref": "#/definitions/DeploymentComponent"
+          },
+          "type": "array"
+        },
+        "solution": {
+          "type": "string"
+        },
+        "type": {
+          "const": "KubernetesCluster",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cluster",
+        "solution",
+        "type"
+      ],
+      "type": "object"
+    },
+    "KubernetesClusterNode": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "worker",
+            "master"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Provider": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "type": "object"
+    },
+    "ProviderContainer": {
+      "additionalProperties": false,
+      "description": "Describes provider like AWS, Google Cloud etc.",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "Provider",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "title"
+          ],
+          "type": "object"
+        },
+        "spec": {
+          "$ref": "#/definitions/Provider"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
+    "Server": {
+      "additionalProperties": false,
+      "description": "Server specification",
+      "properties": {
+        "description": {
+          "description": "Server description",
+          "type": "string"
+        },
+        "firewall": {
+          "$ref": "#/definitions/ServerFirewall",
+          "description": "Determines firewall settings details. It may be not server's but gateway settings. The purpose of this description is to determine which ports / hosts are available for communication."
+        },
+        "hardware": {
+          "$ref": "#/definitions/ServerHardware",
+          "description": "Server hardware details"
+        },
+        "osName": {
+          "description": "Operating system name like \"Ubuntu 20.04\"",
+          "type": "string"
+        },
+        "osType": {
+          "description": "Operating system type: linux, windows etc.",
+          "type": "string"
+        },
+        "pool": {
+          "$ref": "#/definitions/ServerPool",
+          "description": "Determines if it is not specific server but server's pool that can be scaled automatically."
+        },
+        "provider": {
+          "description": "Provider that hosts the server",
+          "type": "string"
+        },
+        "title": {
+          "description": "Human readable server name",
+          "type": "string"
+        },
+        "type": {
+          "description": "Server type: virtual or dedicated",
+          "enum": [
+            "virtual",
+            "dedicated"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "type"
+      ],
+      "type": "object"
+    },
+    "ServerContainer": {
+      "additionalProperties": false,
+      "description": "Describes specific server or server's pool",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "Server",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "title"
+          ],
+          "type": "object"
+        },
+        "spec": {
+          "$ref": "#/definitions/Server"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
+    "ServerCpu": {
+      "additionalProperties": false,
+      "properties": {
+        "cores": {
+          "type": "number"
+        },
+        "model": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ServerDeploymentGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "components": {
+          "items": {
+            "$ref": "#/definitions/DeploymentComponent"
+          },
+          "type": "array"
+        },
+        "method": {
+          "type": "string"
+        },
+        "server": {
+          "type": "string"
+        },
+        "solution": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Server",
+          "type": "string"
+        }
+      },
+      "required": [
+        "server",
+        "solution",
+        "type"
+      ],
+      "type": "object"
+    },
+    "ServerDisk": {
+      "additionalProperties": false,
+      "properties": {
+        "mountPoint": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ServerFirewall": {
+      "additionalProperties": false,
+      "properties": {
+        "inboundPorts": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "$ref": "#/definitions/ServerFirewallRule"
+              }
+            ]
+          },
+          "type": "object"
+        },
+        "outboundPorts": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "$ref": "#/definitions/ServerFirewallRule"
+              }
+            ]
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "ServerFirewallPort": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "$ref": "#/definitions/ServerFirewallPortRange"
+        }
+      ]
+    },
+    "ServerFirewallPortRange": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "number"
+        },
+        "to": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "type": "object"
+    },
+    "ServerFirewallRule": {
+      "additionalProperties": false,
+      "properties": {
+        "hosts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "ports": {
+          "items": {
+            "$ref": "#/definitions/ServerFirewallPort"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "ServerHardware": {
+      "additionalProperties": false,
+      "properties": {
+        "cpus": {
+          "items": {
+            "$ref": "#/definitions/ServerCpu"
+          },
+          "type": "array"
+        },
+        "disks": {
+          "items": {
+            "$ref": "#/definitions/ServerDisk"
+          },
+          "type": "array"
+        },
+        "memory": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ServerPool": {
+      "additionalProperties": false,
+      "properties": {
+        "maxScale": {
+          "description": "Maximum scale factor",
+          "type": "number"
+        },
+        "minScale": {
+          "description": "Minimum scale factor",
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "Solution": {
+      "additionalProperties": false,
+      "properties": {
+        "components": {
+          "additionalProperties": {
+            "$ref": "#/definitions/SolutionComponent"
+          },
+          "description": "Solution components like services, databases, queues etc.",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "SolutionComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "description": "Kind of component like: db, queue, etc.",
+          "type": "string"
+        },
+        "ports": {
+          "additionalProperties": {
+            "$ref": "#/definitions/SolutionPort"
+          },
+          "description": "Determines ports, exposed by component. You can use simple record like \"api: 80\" or use detailed description.",
+          "type": "object"
+        },
+        "title": {
+          "description": "Human readable name of component",
+          "type": "string"
+        },
+        "uses": {
+          "description": "Determines how the current component is associated with others.",
+          "items": {
+            "$ref": "#/definitions/SolutionComponentUsage"
+          },
+          "type": "array"
+        },
+        "volumes": {
+          "additionalProperties": {
+            "$ref": "#/definitions/SolutionVolume"
+          },
+          "description": "Determines whether the component stores state. You can use simple record like \"data: /app/data\" or use detailed description.",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "SolutionComponentUsage": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/definitions/SolutionComponentUsageDetailed"
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "SolutionComponentUsageDetailed": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "description": "Usage description like, for example \"sending email notifications\"",
+          "type": "string"
+        },
+        "port": {
+          "description": "Port name of other component used to communication.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "port",
+        "description"
+      ],
+      "type": "object"
+    },
+    "SolutionComponentVolumeDetailed": {
+      "additionalProperties": false,
+      "properties": {
+        "minSize": {
+          "description": "Minimal size of needed volume",
+          "type": "string"
+        }
+      },
+      "required": [
+        "minSize"
+      ],
+      "type": "object"
+    },
+    "SolutionContainer": {
+      "additionalProperties": false,
+      "description": "Describes application solution with it's components",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "Solution",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "title"
+          ],
+          "type": "object"
+        },
+        "spec": {
+          "$ref": "#/definitions/Solution"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
+    "SolutionPort": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/SolutionPortDetailed"
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "SolutionPortDetailed": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "description": "Port description",
+          "type": "string"
+        },
+        "number": {
+          "description": "Port number",
+          "type": "number"
+        }
+      },
+      "required": [
+        "number",
+        "description"
+      ],
+      "type": "object"
+    },
+    "SolutionVolume": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/SolutionComponentVolumeDetailed"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
+}

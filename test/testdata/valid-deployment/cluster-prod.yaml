@@ -1,0 +1,15 @@
+apiVersion: yaan.aggregion.com/v1
+kind: KubernetesCluster
+metadata:
+  name: prod
+  namespace: client
+
+spec:
+  title: "K8SCluster"
+  description: "Azure Kubernetes Services"
+  nodes:
+    app:
+      type: worker
+    k8sMaster:
+      type: master
+

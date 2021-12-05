@@ -1,0 +1,13 @@
+apiVersion: yaan.aggregion.com/v1beta1
+kind: SolutionUnknown
+metadata:
+  name: dcp
+  title: "DCP"
+
+spec:
+  components:
+    backend:
+      title: "API Server"
+      ports:
+        api: 443
+

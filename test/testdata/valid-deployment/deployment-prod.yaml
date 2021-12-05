@@ -1,0 +1,29 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Deployment
+metadata:
+  name: prod
+  namespace: client
+
+spec:
+  title: "Client Prod Deployment"
+  deploymentGroups:
+    k8s:
+      type: KubernetesCluster
+      cluster: k8s
+      clusterNamespace: prod
+      solution: myapp
+      components:
+        - * # include all components from solution
+        - name: backend
+          externalConnections:
+            - namespace: client
+              deployment: common
+              deploymentGroup: db
+              component: clickHouse # connect to clickHouse component from specific deployment and  deploymentGroup
+        - mongo
+        - name: rabbitMQ
+          disabled: true # exclude component from deployment
+        - name: blockchainNode
+          externalConnections:
+            - component: blockchainNode # connect to all blockchainNode components, included in workspace
+

@@ -1,0 +1,15 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Server
+metadata:
+  name: k8s-master
+  namespace: client
+
+spec:
+  title: "K8S Master Nodes"
+  description: "Azure Managed Kubernetes"
+  provider: azure
+  type: virtual
+  pool:
+    minScale: 3
+    maxScale: 3
+

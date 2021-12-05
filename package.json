@@ -1,0 +1,77 @@
+{
+  "name": "yaan",
+  "description": "Yet Another Architecture Notation",
+  "version": "0.0.1",
+  "author": "Denis Bezrukov @anthrax63",
+  "bin": {
+    "yaan": "./bin/run"
+  },
+  "bugs": "https://github.com/aggregion/yaan/issues",
+  "devDependencies": {
+    "@oclif/dev-cli": "^1.26.6",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^10.17.60",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "bootprint": "^4.0.4",
+    "bootprint-json-schema": "^4.0.4",
+    "cpy-cli": "^3.1.1",
+    "eslint": "^7.32.0",
+    "eslint-config-oclif": "^3.1.2",
+    "eslint-config-oclif-typescript": "^0.2.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "globby": "^10.0.2",
+    "husky": "^7.0.4",
+    "jest": "^27.4.3",
+    "prettier": "^2.5.0",
+    "ts-jest": "^27.0.7",
+    "ts-json-schema-generator": "^0.97.0",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.10"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "homepage": "https://github.com/aggregion/yaan",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "yaan",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "aggregion/yaan",
+  "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
+    "posttest": "eslint . --ext .ts --fix",
+    "prepack": "rm -rf lib && tsc -b tsconfig.build.json && oclif-dev manifest && oclif-dev readme && npm run schema && npx cpy schema.json lib",
+    "version": "oclif-dev readme && git add README.md",
+    "schema": "ts-json-schema-generator --strict-tuples -t ConfigContainer -p 'src/common/schemas/configContainer.ts' -o schema.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "prepare": "husky install",
+    "docs": "npx bootprint json-schema schema.json schema-docs"
+  },
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@oclif/command": "^1.8.7",
+    "@oclif/config": "^1.18.1",
+    "@oclif/plugin-help": "^3.2.10",
+    "ajv": "^6.12.6",
+    "tslib": "^1.14.1",
+    "yaml": "^1.10.2"
+  }
+}
