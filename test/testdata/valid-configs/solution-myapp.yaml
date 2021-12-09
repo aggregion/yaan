@@ -15,7 +15,9 @@ spec:
         - clickHouse
         - redis
         - rabbitMQ
-        - dataService:api
+        - name: dataService
+          port: api
+          description: "Meta information"
 
     mongo:
       title: "MongoDB"
@@ -61,5 +63,14 @@ spec:
         - mongo
         - rabbitMQ
         - clickHouse
+
+    blockchainNode:
+      title: "Blockchain Node"
+      ports:
+        p2p:
+          number: 9000
+          description: "P2P port"
+          protocol: "UDP"
+        http: 8888
 
 

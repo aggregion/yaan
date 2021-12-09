@@ -1,4 +1,6 @@
 export interface SolutionComponentUsageDetailed {
+    name: string;
+
     /**
      * Port name of other component used to communication.
      */
@@ -8,11 +10,14 @@ export interface SolutionComponentUsageDetailed {
      * Usage description like, for example "sending email notifications"
      */
     description: string;
+
+    /**
+     * If required, related component must exist on all scopes where current component exists. Default: false.
+     */
+    required?: boolean;
 }
 
-export type SolutionComponentUsage =
-    | string
-    | Record<string, SolutionComponentUsageDetailed>;
+export type SolutionComponentUsage = string | SolutionComponentUsageDetailed;
 
 export interface SolutionComponentVolumeDetailed {
     /**
@@ -31,7 +36,9 @@ export interface SolutionPortDetailed {
     /**
      * Port description
      */
-    description: string;
+    description?: string;
+
+    protocol?: string;
 }
 
 export type SolutionPort = SolutionPortDetailed | number;
@@ -72,5 +79,5 @@ export interface Solution {
     /**
      * Solution components like services, databases, queues etc.
      */
-    components?: Record<string, SolutionComponent>;
+    components: Record<string, SolutionComponent>;
 }

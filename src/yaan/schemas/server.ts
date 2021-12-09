@@ -6,6 +6,7 @@ export interface ServerCpu {
 export interface ServerDisk {
     size?: string;
     mountPoint?: string;
+    customProps?: Record<string, any>;
 }
 
 export interface ServerHardware {
@@ -22,13 +23,19 @@ export interface ServerFirewallPortRange {
 export type ServerFirewallPort = number | ServerFirewallPortRange;
 
 export interface ServerFirewallRule {
+    description?: string;
     ports?: ServerFirewallPort[];
     hosts?: string[];
 }
 
+export type ServerFirewallPortsRule = Record<
+    string,
+    number | ServerFirewallRule
+>;
+
 export interface ServerFirewall {
-    inboundPorts?: Record<string, number | ServerFirewallRule>;
-    outboundPorts?: Record<string, number | ServerFirewallRule>;
+    inboundPorts?: ServerFirewallPortsRule;
+    outboundPorts?: ServerFirewallPortsRule;
 }
 
 export interface ServerPool {

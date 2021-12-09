@@ -7,6 +7,7 @@ spec:
   title: "Client Prod Deployment"
   deploymentGroups:
     k8s:
+      title: "Cluster deployment"
       type: KubernetesCluster
       cluster: k8s
       clusterNamespace: prod
@@ -18,10 +19,11 @@ spec:
             - deployment: common
               deploymentGroup: db
               component: clickHouse
+              port: main
         - mongo
-        - name: rabbitMQ
-          disabled: true
+        - rabbitMQ
         - name: blockchainNode
           externalConnections:
             - component: blockchainNode
+              port: p2p
 

@@ -1,10 +1,14 @@
-import { Parser, ProjectContainer } from '../common/types';
-import fs from 'fs';
-import path from 'path';
-import { ConfigContainer } from '../common/schemas/configContainer';
+import { Parser, ProjectContainer } from '../yaan/types';
+import * as fs from 'fs';
+import * as path from 'path';
+import { ConfigContainer } from '../yaan/schemas/configContainer';
+import * as YAML from 'yaml';
+import { Project } from '../yaan/project';
 import Ajv from 'ajv';
-import YAML from 'yaml';
-import { Project } from '../common/project';
+
+const unCapitalize = (string: string) => {
+    return string.charAt(0).toLocaleLowerCase() + string.slice(1);
+};
 
 export abstract class BaseFileParser implements Parser {
     protected readonly jsonSchema: any;
@@ -44,8 +48,14 @@ export abstract class BaseFileParser implements Parser {
         }
     }
 
-    parse(data: (string | Buffer)[], names: string[] = []): ProjectContainer {
-        const project = new Project();
+    parse(
+        data: (string | Buffer)[],
+        project?: ProjectContainer,
+        names: string[] = [],
+    ): ProjectContainer {
+        if (!project) {
+            project = new Project();
+        }
         for (let i = 0; i < data.length; i++) {
             const configData = data[i];
             const container = this.parseData(configData) as ConfigContainer;
@@ -58,8 +68,7 @@ export abstract class BaseFileParser implements Parser {
 
             this.validateSchema(container.spec, container.kind, names[i]);
 
-            project.set(
-                container.kind,
+            (project as any)[`${unCapitalize(container.kind)}s`].set(
                 container.metadata.name,
                 container.spec,
             );
@@ -67,9 +76,10 @@ export abstract class BaseFileParser implements Parser {
         return project;
     }
 
-    parseFiles(files: string[]): ProjectContainer {
+    parseFiles(files: string[], project?: ProjectContainer): ProjectContainer {
         return this.parse(
             files.map((fileName) => fs.readFileSync(fileName, 'utf8')),
+            project,
             files,
         );
     }

@@ -3,6 +3,7 @@ export interface DeploymentExternalConnection {
     deployment?: string;
     deploymentGroup?: string;
     component: string;
+    port?: string;
 }
 
 export interface DeploymentComponentDetailed {
@@ -23,6 +24,7 @@ export type DeploymentComponent =
     | string;
 
 interface CommonDeploymentGroupProps {
+    title?: string;
     solution: string;
     components?: DeploymentComponent[];
 }
@@ -47,5 +49,5 @@ export type DeploymentGroup =
 export interface Deployment {
     title: string;
     description?: string;
-    deploymentGroups?: Record<string, DeploymentGroup>;
+    deploymentGroups: Record<string, DeploymentGroup>;
 }

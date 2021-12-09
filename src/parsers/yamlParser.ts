@@ -1,4 +1,4 @@
-import YAML from 'yaml';
+import * as YAML from 'yaml';
 import { BaseFileParser } from './baseFileParser';
 
 export class YamlParser extends BaseFileParser {

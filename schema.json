@@ -71,7 +71,8 @@
         }
       },
       "required": [
-        "title"
+        "title",
+        "deploymentGroups"
       ],
       "type": "object"
     },
@@ -180,6 +181,9 @@
         },
         "namespace": {
           "type": "string"
+        },
+        "port": {
+          "type": "string"
         }
       },
       "required": [
@@ -246,19 +250,25 @@
         "description": {
           "type": "string"
         },
-        "nodes": {
+        "distribution": {
+          "type": "string"
+        },
+        "servers": {
           "additionalProperties": {
-            "$ref": "#/definitions/KubernetesClusterNode"
+            "$ref": "#/definitions/KubernetesClusterServer"
           },
           "type": "object"
         },
         "title": {
           "type": "string"
+        },
+        "version": {
+          "type": "string"
         }
       },
       "required": [
         "title",
-        "nodes"
+        "servers"
       ],
       "type": "object"
     },
@@ -315,6 +325,9 @@
         "solution": {
           "type": "string"
         },
+        "title": {
+          "type": "string"
+        },
         "type": {
           "const": "KubernetesCluster",
           "type": "string"
@@ -327,7 +340,7 @@
       ],
       "type": "object"
     },
-    "KubernetesClusterNode": {
+    "KubernetesClusterServer": {
       "additionalProperties": false,
       "properties": {
         "type": {
@@ -596,6 +609,9 @@
         "solution": {
           "type": "string"
         },
+        "title": {
+          "type": "string"
+        },
         "type": {
           "const": "Server",
           "type": "string"
@@ -611,6 +627,9 @@
     "ServerDisk": {
       "additionalProperties": false,
       "properties": {
+        "customProps": {
+          "type": "object"
+        },
         "mountPoint": {
           "type": "string"
         },
@@ -624,30 +643,10 @@
       "additionalProperties": false,
       "properties": {
         "inboundPorts": {
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "$ref": "#/definitions/ServerFirewallRule"
-              }
-            ]
-          },
-          "type": "object"
+          "$ref": "#/definitions/ServerFirewallPortsRule"
         },
         "outboundPorts": {
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "$ref": "#/definitions/ServerFirewallRule"
-              }
-            ]
-          },
-          "type": "object"
+          "$ref": "#/definitions/ServerFirewallPortsRule"
         }
       },
       "type": "object"
@@ -678,9 +677,25 @@
       ],
       "type": "object"
     },
+    "ServerFirewallPortsRule": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "$ref": "#/definitions/ServerFirewallRule"
+          }
+        ]
+      },
+      "type": "object"
+    },
     "ServerFirewallRule": {
       "additionalProperties": false,
       "properties": {
+        "description": {
+          "type": "string"
+        },
         "hosts": {
           "items": {
             "type": "string"
@@ -747,7 +762,8 @@
         }
       },
       "required": [
-        "title"
+        "title",
+        "components"
       ],
       "type": "object"
     },
@@ -792,10 +808,7 @@
           "type": "string"
         },
         {
-          "additionalProperties": {
-            "$ref": "#/definitions/SolutionComponentUsageDetailed"
-          },
-          "type": "object"
+          "$ref": "#/definitions/SolutionComponentUsageDetailed"
         }
       ]
     },
@@ -806,12 +819,20 @@
           "description": "Usage description like, for example \"sending email notifications\"",
           "type": "string"
         },
+        "name": {
+          "type": "string"
+        },
         "port": {
           "description": "Port name of other component used to communication.",
           "type": "string"
+        },
+        "required": {
+          "description": "If required, related component must exist on all scopes where current component exists. Default: false.",
+          "type": "boolean"
         }
       },
       "required": [
+        "name",
         "port",
         "description"
       ],
@@ -885,11 +906,13 @@
         "number": {
           "description": "Port number",
           "type": "number"
+        },
+        "protocol": {
+          "type": "string"
         }
       },
       "required": [
-        "number",
-        "description"
+        "number"
       ],
       "type": "object"
     },
@@ -900,6 +923,28 @@
         },
         {
           "type": "string"
+        }
+      ]
+    },
+    "YaanEntity": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Solution"
+        },
+        {
+          "$ref": "#/definitions/KubernetesCluster"
+        },
+        {
+          "$ref": "#/definitions/Provider"
+        },
+        {
+          "$ref": "#/definitions/Server"
+        },
+        {
+          "$ref": "#/definitions/Deployment"
+        },
+        {
+          "$ref": "#/definitions/Presentation"
         }
       ]
     }

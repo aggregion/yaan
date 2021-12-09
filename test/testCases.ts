@@ -1,6 +1,6 @@
 import path from 'path';
 import glob from 'glob';
-import { Parser } from '../src/common/types';
+import { Parser } from '../src/yaan/types';
 
 export const runTestCases = (
     validFilesGlob: string,

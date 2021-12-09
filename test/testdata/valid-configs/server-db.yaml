@@ -22,6 +22,7 @@ spec:
     inboundPorts:
       nginx: 443
       node:
+        description: "Node.js port"
         ports:
           - 8321
           - from: 9000

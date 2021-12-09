@@ -23,6 +23,14 @@ export interface EntityTypeBinding {
     Presentation: Presentation;
 }
 
+export type YaanEntity =
+    | Solution
+    | KubernetesCluster
+    | Provider
+    | Server
+    | Deployment
+    | Presentation;
+
 export interface CommonConfigContainerAttributes {
     apiVersion: string;
     kind: EntityType;

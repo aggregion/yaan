@@ -20,5 +20,4 @@ spec:
               component: clickHouse # connect to clickHouse component from specific deployment and  deploymentGroup
         - mongo
         - rabbitMQ
-        - name: blockchainNode
-          disabled: true
+        - blockchainNode

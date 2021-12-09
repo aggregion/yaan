@@ -26,3 +26,7 @@ Example workflow:
 
 Detailed description of entities you can read in [schema-docs](./schema-docs) directory.
 
+## CLI
+
+This module provides CLI for exporting and validating YAAN projects. Type yaan --help for details.
+

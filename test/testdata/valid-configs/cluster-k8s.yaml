@@ -1,14 +1,16 @@
 apiVersion: yaan.aggregion.com/v1
 kind: KubernetesCluster
 metadata:
-  name: prod
+  name: k8s
 
 spec:
   title: "K8SCluster"
   description: "Azure Kubernetes Services"
-  nodes:
-    app:
+  distribution: "k3s"
+  version: "20.13"
+  servers:
+    k8s-worker:
       type: worker
-    k8sMaster:
+    k8s-master:
       type: master
 
