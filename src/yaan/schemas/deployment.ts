@@ -4,6 +4,7 @@ export interface DeploymentExternalConnection {
     deploymentGroup?: string;
     component: string;
     port?: string;
+    description?: string;
 }
 
 export interface DeploymentComponentDetailed {

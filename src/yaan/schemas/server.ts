@@ -72,7 +72,7 @@ export interface Server {
     /**
      * Server type: virtual or dedicated
      */
-    type: 'virtual' | 'dedicated';
+    type?: 'virtual' | 'dedicated';
 
     /**
      * Operating system type: linux, windows etc.

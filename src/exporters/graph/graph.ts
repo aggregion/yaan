@@ -366,6 +366,7 @@ export const createGraph = (project: ProjectContainer) => {
                                             component: connection.component,
                                             port: connection.port,
                                         },
+                                        description: connection.description,
                                     },
                                 });
                                 gunComp.get('connections').set(connection);

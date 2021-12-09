@@ -179,6 +179,9 @@
         "deploymentGroup": {
           "type": "string"
         },
+        "description": {
+          "type": "string"
+        },
         "namespace": {
           "type": "string"
         },
@@ -539,8 +542,7 @@
         }
       },
       "required": [
-        "title",
-        "type"
+        "title"
       ],
       "type": "object"
     },
@@ -770,6 +772,10 @@
     "SolutionComponent": {
       "additionalProperties": false,
       "properties": {
+        "description": {
+          "description": "Component description",
+          "type": "string"
+        },
         "kind": {
           "description": "Kind of component like: db, queue, etc.",
           "type": "string"

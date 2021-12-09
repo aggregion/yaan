@@ -50,6 +50,11 @@ export interface SolutionComponent {
     title?: string;
 
     /**
+     * Component description
+     */
+    description?: string;
+
+    /**
      * Determines ports, exposed by component. You can use simple record like "api: 80" or use detailed description.
      */
     ports?: Record<string, SolutionPort>;
