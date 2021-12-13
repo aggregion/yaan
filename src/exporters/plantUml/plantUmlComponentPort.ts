@@ -1,20 +1,32 @@
 import { PlantUmlObject } from './plantUmlObject';
-import { SolutionPortDetailed } from '../../yaan/schemas/solution';
+import {
+    SolutionPort,
+    SolutionPortDetailed,
+} from '../../yaan/schemas/solution';
 
 export class PlantUmlComponentPort extends PlantUmlObject {
     constructor(
         public readonly id: string,
-        public readonly port: SolutionPortDetailed & { title: string },
+        public readonly port: SolutionPort,
+        public readonly portName: string,
     ) {
         super(id);
     }
 
     protected get header(): string {
+        const port: SolutionPortDetailed =
+            typeof this.port === 'object'
+                ? this.port
+                : {
+                      number: this.port,
+                      description: '',
+                      protocol: 'TCP',
+                  };
         return `
-        AddProperty("${this.port.protocol || 'TCP'}", "${this.port.number}")
-        Deployment_Node_L("${this.id}", "${this.port.title || ''}", "Port", "${
-            this.port.description || ''
-        }") {
+        AddProperty("${port.protocol || 'TCP'}", "${port.number}")
+        Deployment_Node_L("${this.id}", "${
+            this.portName || port.description
+        }", "Port", "${port.description || ''}") {
         `;
     }
 

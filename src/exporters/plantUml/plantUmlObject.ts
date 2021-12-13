@@ -7,7 +7,7 @@ export abstract class PlantUmlObject {
 
     protected abstract get footer(): string;
 
-    public print() {
+    public print(): string {
         return `
         ${this.header}
         ${this.children.map((c) => c.print()).join('\n')}

@@ -149,7 +149,7 @@ export class PlantUmlServer extends PlantUmlObject {
             !!this.server.pool
                 ? `
         AddProperty('Minimal scale', '${this.server.pool?.minScale}')
-        AddProperty('Maximal scale', '${this.server.pool?.maxScale}')`
+        AddProperty('Maximal scale', '${this.server.pool?.maxScale || '∞'}')`
                 : ''
         }
         AddProperty("RAM", "${this.server.hardware?.memory || '-'}")
@@ -160,7 +160,7 @@ export class PlantUmlServer extends PlantUmlObject {
         return `
         ${this.renderProps()}
         Deployment_Node_L("${this.id}", "${this.server.title}", "Server", "${
-            this.server.description
+            this.server.description || ''
         }", $sprite=server, $tags=server){
           ${this.renderCpus()}
           ${this.renderDisks()}

@@ -9,11 +9,25 @@ export class PlantUmlKubernetesCluster extends PlantUmlObject {
         super(id);
     }
 
+    private renderProps(): string {
+        const props = [];
+        if (this.cluster.distribution) {
+            props.push(
+                `AddProperty("Distribution", "${this.cluster.distribution}")`,
+            );
+        }
+        if (this.cluster.version) {
+            props.push(`AddProperty("Version", "${this.cluster.version}")`);
+        }
+        return props.join('\n');
+    }
+
     protected get header(): string {
         return `
-        AddProperty("Distribution", "${this.cluster.distribution}")
-        AddProperty("Version", "${this.cluster.version}")
-        Deployment_Node_L("${this.id}", "${this.cluster.title}", "Kubernetes Cluster", "", $sprite=kubernetes, $tags=kubernetesCluster){
+        ${this.renderProps()}
+        Deployment_Node_L("${this.id}", "${
+            this.cluster.title
+        }", "Kubernetes Cluster", "", $sprite=kubernetes, $tags=kubernetesCluster){
         `;
     }
 

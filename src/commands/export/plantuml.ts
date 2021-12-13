@@ -35,7 +35,7 @@ export default class Plantuml extends Command {
                 return -1;
             }
         } catch (e) {
-            console.log(e);
+            console.error(e);
             this.error(e as Error);
         }
     }

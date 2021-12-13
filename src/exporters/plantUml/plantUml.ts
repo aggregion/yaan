@@ -22,92 +22,62 @@ export class PlantUml extends PlantUmlObject {
             throw new Error(`Presentation not found: ${presentation}`);
         }
         const presObj = new PlantUmlPresentation(
-            pres.value._key,
-            pres.value.value,
+            pres.key,
+            pres.value.presentation,
         );
         this.children.push(presObj);
-        const servers = pres.get('servers').value;
-        for (const server of Object.values(servers) as any) {
+        pres.get('servers').each((server) => {
             presObj.children.push(
-                new PlantUmlServer(server._key, server.value),
+                new PlantUmlServer(server.key, server.get('server').value),
             );
-        }
-        const clusters = pres.get('clusters').value;
-        for (const cluster of Object.values(clusters) as any) {
+        });
+        pres.get('kubernetesClusters').each((cluster) => {
             presObj.children.push(
-                new PlantUmlKubernetesCluster(cluster._key, cluster.value),
+                new PlantUmlKubernetesCluster(
+                    cluster.key,
+                    cluster.get('kubernetesCluster').value,
+                ),
             );
-        }
-        const deployments = pres.get('deployments');
-        for (const [depName, deployment] of Object.entries(
-            deployments.value,
-        ) as any) {
+        });
+        pres.get('deployments').each((deployment) => {
             const plantDep = new PlantUmlDeployment(
-                deployment._key,
-                deployment.value,
+                deployment.key,
+                deployment.get('deployment').value,
             );
             presObj.children.push(plantDep);
-            const groups = pres.get('deployments').get(depName).get('groups');
-            if (groups.value) {
-                for (const [groupName, group] of Object.entries(
-                    groups.value,
-                ) as any) {
-                    const plantGroup = new PlantUmlDeploymentGroup(
-                        group._key,
-                        group.value,
-                    );
-                    plantDep.children.push(plantGroup);
-                    const components = pres
-                        .get('deployments')
-                        .get(depName)
-                        .get('groups')
-                        .get(groupName)
-                        .get('components');
-                    if (components.value) {
-                        for (const [compName, component] of Object.entries(
-                            components.value,
-                        ) as any) {
-                            const plantComponent = new PlantUmlComponent(
-                                component._key,
-                                component.value,
-                            );
-                            plantGroup.children.push(plantComponent);
-                            const ports = pres
-                                .get('deployments')
-                                .get(depName)
-                                .get('groups')
-                                .get(groupName)
-                                .get('components')
-                                .get(compName)
-                                .get('ports');
-                            if (ports.value) {
-                                for (const [, port] of Object.entries(
-                                    ports.value,
-                                ) as any) {
-                                    const plantPort = new PlantUmlComponentPort(
-                                        port._key,
-                                        port,
-                                    );
-                                    plantComponent.children.push(plantPort);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        const relations = pres.get('relations');
-        if (relations.value) {
-            for (const relation of relations.value as any) {
-                const plantRel = new PlantUmlRelation(
-                    relation.src.value._key,
-                    relation.dest.value._key,
-                    relation.type,
-                    relation.props?.description,
+            deployment.get('groups').each((group) => {
+                const plantGroup = new PlantUmlDeploymentGroup(
+                    group.key,
+                    group.get('deploymentGroup').value,
                 );
-                presObj.children.push(plantRel);
-            }
-        }
+                plantDep.children.push(plantGroup);
+                group.get('components').each((component) => {
+                    const plantComponent = new PlantUmlComponent(
+                        component.key,
+                        component.get('component').value,
+                    );
+                    plantGroup.children.push(plantComponent);
+                    component.get('ports').each((port, portName) => {
+                        const plantPort = new PlantUmlComponentPort(
+                            port.key,
+                            port.value,
+                            portName,
+                        );
+                        plantComponent.children.push(plantPort);
+                    });
+                });
+            });
+        });
+        pres.get('relations').each((relation) => {
+            const relationVal = relation.value;
+            const plantRel = new PlantUmlRelation(
+                relationVal.src.key,
+                relationVal.dest.key,
+                relationVal.type,
+                relationVal.props?.description,
+            );
+            presObj.children.push(plantRel);
+        });
     }
 
     protected get header(): string {

@@ -13,6 +13,7 @@
     "@types/jest": "^27.0.3",
     "@types/jest-expect-message": "^1.0.3",
     "@types/node": "^10.17.60",
+    "@types/object-path": "^0.11.1",
     "@types/uuid": "^8.3.3",
     "@typescript-eslint/eslint-plugin": "^5.5.0",
     "@typescript-eslint/parser": "^5.5.0",
@@ -79,8 +80,8 @@
     "@oclif/plugin-help": "^3.2.10",
     "@tiagonapoli/oclif-plugin-spaced-commands": "^1.0.1",
     "ajv": "^8.8.2",
+    "object-path": "^0.11.8",
     "tslib": "^1.14.1",
-    "uuid": "^8.3.2",
     "yaml": "^1.10.2"
   }
 }

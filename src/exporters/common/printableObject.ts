@@ -9,11 +9,10 @@ export abstract class PrintableObject implements Printable {
 
     constructor(public readonly id: string) {}
 
-    public print(): string {
-        return this.children.map((c) => c.print()).join('\n');
-    }
-
-    public get uniqId(): string {
-        return `${this.objectName}/${this.id}`;
+    public print(level = 0): string {
+        return this.children
+            .map((c) => c.print(level + 1))
+            .map((s) => '  '.repeat(level) + s)
+            .join('\n');
     }
 }

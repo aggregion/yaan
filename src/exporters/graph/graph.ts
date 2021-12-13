@@ -1,68 +1,76 @@
 import { ProjectContainer } from '../../yaan/types';
-import { SolutionComponent } from '../../yaan/schemas/solution';
-import { DeploymentExternalConnection } from '../../yaan/schemas/deployment';
-import * as uuid from 'uuid';
+import { SolutionComponent, SolutionPort } from '../../yaan/schemas/solution';
+import {
+    Deployment,
+    DeploymentExternalConnection,
+    DeploymentGroup,
+} from '../../yaan/schemas/deployment';
+import { Graph, GraphNode } from '../../yaan/graph';
+import { Server } from '../../yaan/schemas/server';
+import { KubernetesCluster } from '../../yaan/schemas/kubernetesCluster';
+import { Presentation } from '../../yaan/schemas/presentation';
 
 type MapValueType<A> = A extends Map<any, infer V> ? V : never;
 
-export class GraphNode {
-    constructor(
-        public object: Record<string, any> = { '#': {} },
-        public name: string = '#',
-    ) {}
+enum RelationType {
+    UsesInternal = 'uses-internal',
+    UsesExternal = 'uses-external',
+    DeployedOn = 'deployed-on',
+    ClusteredOn = 'clustered-on',
+}
 
-    get(name: string): GraphNode {
-        if (!this.object[this.name][name]) {
-            this.object[this.name][name] = {};
-        }
-        return new GraphNode(this.object[this.name], name);
-    }
+export interface GraphRelationPropsByType {
+    'uses-internal': never;
+    'uses-external': never;
+    'deployed-on': never;
+    'clustered-on': {
+        clusterNodeType: 'worker' | 'master';
+    };
+}
 
-    put(value: any) {
-        if (value === undefined) {
-            return this;
-        }
-        if (typeof value.valueOf === 'function') {
-            value = value.valueOf();
-        }
-        value._key = uuid.v4().replace(/-/g, '');
-        this.object[this.name] = value;
-        return this;
-    }
+export interface GraphRelation<T extends RelationType> {
+    src: GraphNode<any>;
+    dest: GraphNode<any>;
+    type: T;
+    props: GraphRelationPropsByType[T];
+}
 
-    set(value: any) {
-        if (value !== undefined && typeof value.valueOf === 'function') {
-            value = value.valueOf();
-        }
-        if (!Array.isArray(this.object[this.name])) {
-            this.object[this.name] = [];
-        }
-        const len = this.object[this.name].push(value);
-        return new GraphNode(this.object[this.name], String(len - 1));
-    }
+export interface GraphServer {
+    server: Server;
+}
 
-    get value(): any {
-        return this.valueOf();
-    }
+export interface GraphKubernetesCluster {
+    kubernetesCluster: KubernetesCluster;
+}
 
-    valueOf(): any {
-        const val = this.object[this.name];
-        if (typeof val === 'object' && Object.keys(val).length === 0) {
-            return null;
+export interface GraphPresentation {
+    relations: GraphRelation<any>[];
+    servers: Record<string, GraphServer>;
+    kubernetesClusters: Record<string, GraphKubernetesCluster>;
+    deployments: Record<
+        string,
+        {
+            deployment: Deployment;
+            groups: Record<
+                string,
+                {
+                    deploymentGroup: DeploymentGroup;
+                    components: Record<
+                        string,
+                        {
+                            component: SolutionComponent;
+                            ports: Record<string, SolutionPort>;
+                        }
+                    >;
+                }
+            >;
         }
-        return val;
-    }
+    >;
+    presentation: Presentation;
+}
 
-    map() {
-        if (typeof this.object[this.name] === 'object') {
-            return Object.entries(this.object[this.name]).map(([k, v]) => [
-                v,
-                k,
-            ]);
-        } else if (Array.isArray(this.object[this.name])) {
-            return this.object[this.name];
-        }
-    }
+export interface GraphScheme {
+    presentations: Record<string, GraphPresentation>;
 }
 
 /*
@@ -125,12 +133,25 @@ export const createGraph = (project: ProjectContainer) => {
         return val as MapValueType<ProjectContainer[T]>;
     };
 
-    const graph = new GraphNode();
+    const graph = new Graph<GraphScheme>();
 
     for (const [presName, pres] of project.presentations) {
+        const deferredResolveRelations: {
+            src: GraphNode<any>;
+            deployment?: string;
+            group?: string;
+            component: string;
+            port?: string;
+            srcDeployment: string;
+            srcGroup: string;
+            srcComponent: string;
+        }[] = [];
         const gunPres = graph.get('presentations').get(presName).put({
-            name: presName,
-            value: pres,
+            relations: [],
+            servers: {},
+            kubernetesClusters: {},
+            deployments: {},
+            presentation: pres,
         });
         for (const presDepValue of pres.deployments) {
             let depName;
@@ -141,13 +162,14 @@ export const createGraph = (project: ProjectContainer) => {
             }
             const dep = getFromProject('deployments', depName);
             const gunDep = gunPres.get('deployments').get(depName).put({
-                value: dep,
+                deployment: dep,
+                groups: {},
             });
             for (const [dgName, dg] of Object.entries(dep.deploymentGroups)) {
-                const gunDg = gunDep
-                    .get('groups')
-                    .get(dgName)
-                    .put({ value: dg });
+                const gunDg = gunDep.get('groups').get(dgName).put({
+                    deploymentGroup: dg,
+                    components: {},
+                });
                 let dgContainer;
                 switch (dg.type) {
                     case 'KubernetesCluster':
@@ -155,57 +177,44 @@ export const createGraph = (project: ProjectContainer) => {
                             'kubernetesClusters',
                             dg.cluster,
                         );
-                        const existingCluster = gunPres
-                            .get('clusters')
+                        const gunCluster = gunPres
+                            .get('kubernetesClusters')
                             .get(dg.cluster);
-                        if (existingCluster.value) {
-                            dgContainer = existingCluster;
-                        } else {
-                            const gunCluster = existingCluster.put({
-                                value: cluster,
-                            });
-                            for (const [srvName, srv] of Object.entries(
-                                cluster.servers,
-                            )) {
-                                const server = getFromProject(
-                                    'servers',
-                                    srvName,
-                                );
-                                const gunServer = gunPres
-                                    .get('servers')
-                                    .get(srvName)
-                                    .put({
-                                        value: server,
-                                    });
-                                gunPres.get('relations').set({
-                                    src: gunCluster,
-                                    dest: gunServer,
-                                    resolved: true,
-                                    type: '-->',
-                                    props: {
-                                        description: srv.type,
-                                    },
-                                });
-                            }
-                            dgContainer = gunCluster;
+                        if (!gunCluster.defined()) {
+                            gunCluster.put({ kubernetesCluster: cluster });
                         }
+                        for (const [srvName, srv] of Object.entries(
+                            cluster.servers,
+                        )) {
+                            const server = getFromProject('servers', srvName);
+                            const gunServer = gunPres
+                                .get('servers')
+                                .get(srvName)
+                                .put({ server: server });
+                            gunPres.get('relations').set({
+                                src: gunCluster,
+                                dest: gunServer,
+                                type: RelationType.ClusteredOn,
+                                props: {
+                                    clusterNodeType: srv.type,
+                                },
+                            });
+                        }
+                        dgContainer = gunCluster;
                         break;
                     case 'Server':
                         const server = getFromProject('servers', dg.server);
                         const gunServer = gunPres
                             .get('servers')
                             .get(dg.server)
-                            .put({
-                                value: server,
-                            });
+                            .put({ server: server });
                         dgContainer = gunServer;
                         break;
                 }
                 gunPres.get('relations').set({
                     src: gunDg,
                     dest: dgContainer,
-                    type: '-->',
-                    resolved: true,
+                    type: RelationType.DeployedOn,
                     props: {
                         description: 'Deployed on',
                     },
@@ -273,25 +282,13 @@ export const createGraph = (project: ProjectContainer) => {
                                 ports[portName].title = portName;
                             }
                         }
-                        const val = { value: comp };
                         const gunComp = gunDg
                             .get('components')
                             .get(compName)
-                            .put(val);
+                            .put({ component: comp, ports: {} });
                         for (const [portName, port] of Object.entries(ports)) {
-                            gunDg
-                                .get('components')
-                                .get(compName)
-                                .get('ports')
-                                .get(portName)
-                                .put(port);
+                            gunComp.get('ports').get(portName).put(port);
                         }
-                        gunPres.get('allComponents').set({
-                            deploymentName: depName,
-                            groupName: dgName,
-                            componentName: compName,
-                            component: gunComp,
-                        });
                         if (comp.uses) {
                             for (const compUsage of comp.uses) {
                                 if (typeof compUsage === 'string') {
@@ -304,9 +301,14 @@ export const createGraph = (project: ProjectContainer) => {
                                     }
                                     gunPres.get('relations').set({
                                         src: gunComp,
-                                        dest: null,
-                                        resolved: false,
-                                        type: '-->',
+                                        dest: gunPres
+                                            .get('deployments')
+                                            .get(depName)
+                                            .get('groups')
+                                            .get(dgName)
+                                            .get('components')
+                                            .get(compUsage),
+                                        type: RelationType.UsesInternal,
                                         props: {
                                             component: {
                                                 deployment: depName,
@@ -332,9 +334,16 @@ export const createGraph = (project: ProjectContainer) => {
                                     }
                                     gunPres.get('relations').set({
                                         src: gunComp,
-                                        dest: null,
-                                        resolved: false,
-                                        type: '-->',
+                                        dest: gunPres
+                                            .get('deployments')
+                                            .get(depName)
+                                            .get('groups')
+                                            .get(dgName)
+                                            .get('components')
+                                            .get(compUsage.name)
+                                            .get('ports')
+                                            .get(compUsage.port),
+                                        type: RelationType.UsesInternal,
                                         props: {
                                             componentPort: {
                                                 deployment: depName,
@@ -353,23 +362,16 @@ export const createGraph = (project: ProjectContainer) => {
                             for (const connection of componentConnections[
                                 compName
                             ]) {
-                                gunPres.get('relations').set({
+                                deferredResolveRelations.push({
                                     src: gunComp,
-                                    dest: null,
-                                    resolved: false,
-                                    type: '-->',
-                                    props: {
-                                        deploymentGroup: {
-                                            deployment: connection.deployment,
-                                            deploymentGroup:
-                                                connection.deploymentGroup,
-                                            component: connection.component,
-                                            port: connection.port,
-                                        },
-                                        description: connection.description,
-                                    },
+                                    deployment: connection.deployment,
+                                    group: connection.deploymentGroup,
+                                    component: connection.component,
+                                    port: connection.port,
+                                    srcGroup: dgName,
+                                    srcDeployment: depName,
+                                    srcComponent: compName,
                                 });
-                                gunComp.get('connections').set(connection);
                             }
                         }
                     }
@@ -378,79 +380,50 @@ export const createGraph = (project: ProjectContainer) => {
         }
 
         // Resolve relations
-        const relations = gunPres.get('relations').value;
-        for (const rel of relations.filter(
-            (rel: any) => !rel.resolved,
-        ) as any) {
-            const props = rel.props;
-            if (props.component) {
-                const dest = gunPres
-                    .get('deployments')
-                    .get(props.component.deployment)
-                    .get('groups')
-                    .get(props.component.group)
-                    .get('components')
-                    .get(props.component.component);
-                if (dest.value) {
-                    rel.dest = dest;
-                    rel.resolved = true;
-                } else if (props.required) {
-                    throw new Error(
-                        `Component does not exist in current scope: ${props.component.deployment}/${props.component.group}`,
-                    );
+        for (const defRel of deferredResolveRelations) {
+            gunPres.get('deployments').each((dep, depName) => {
+                if (defRel.deployment && depName !== defRel.deployment) {
+                    return;
                 }
-            } else if (props.componentPort) {
-                const dest = gunPres
-                    .get('deployments')
-                    .get(props.componentPort.deployment)
-                    .get('groups')
-                    .get(props.componentPort.group)
-                    .get('components')
-                    .get(props.componentPort.component)
-                    .get('ports')
-                    .get(props.componentPort.port);
-                if (dest.value) {
-                    rel.dest = dest;
-                    rel.resolved = true;
-                } else if (props.required) {
-                    throw new Error(
-                        `Component does not exist in current scope: ${props.component.deployment}/${props.component.group}`,
-                    );
-                }
-            } else if (props.deploymentGroup) {
-                const allComponents = gunPres.get('allComponents').value;
-                const dg = props.deploymentGroup;
-                // console.log('SRC', rel.src.value._key);
-                // console.log('DG', dg);
-                const componentsToBind = allComponents.filter(
-                    (comp: any) =>
-                        (!dg.deployment ||
-                            dg.deployment === comp.deploymentName) &&
-                        (!dg.deploymentGroup ||
-                            dg.deploymentGroup === comp.groupName) &&
-                        dg.component === comp.componentName &&
-                        rel.src.value._key !== comp.component.value._key,
-                );
-                for (const comp of componentsToBind) {
-                    let bindItem = comp.component;
-                    if (dg.port) {
-                        bindItem = bindItem.get('ports').get(dg.port);
+                dep.get('groups').each((group, groupName) => {
+                    if (defRel.group && groupName !== defRel.group) {
+                        return;
                     }
-                    if (!bindItem.value) {
-                        throw new Error(
-                            `Can't resolve deployment group external connection: ${
-                                dg.deployment || '*'
-                            }/${dg.deploymentGroup || '*'}/${dg.component}/${
-                                dg.port || '*'
-                            }`,
-                        );
-                    }
-                    rel.dest = bindItem;
-                    rel.resolved = true;
-                }
-            }
+                    group.get('components').each((comp, compName) => {
+                        if (defRel.component && compName !== defRel.component) {
+                            return;
+                        }
+                        // Skip self-links
+                        if (
+                            defRel.srcDeployment === depName &&
+                            defRel.srcGroup === groupName &&
+                            defRel.srcComponent === compName
+                        ) {
+                            return;
+                        }
+                        if (defRel.port) {
+                            comp.get('ports').each((port, portName) => {
+                                if (portName === defRel.port) {
+                                    gunPres.get('relations').set({
+                                        src: defRel.src,
+                                        dest: port,
+                                        type: RelationType.UsesExternal,
+                                        props: {},
+                                    });
+                                }
+                            });
+                        } else {
+                            gunPres.get('relations').set({
+                                src: defRel.src,
+                                dest: comp,
+                                type: RelationType.UsesExternal,
+                                props: {},
+                            });
+                        }
+                    });
+                });
+            });
         }
-        gunPres.get('relations').put(relations.filter((r: any) => r.resolved));
     }
     return graph;
 };
