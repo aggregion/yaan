@@ -124,10 +124,9 @@ export class GraphNode<T> {
     }
 
     get key(): string {
-        /*const hash = crypto.createHash('md5');
+        const hash = crypto.createHash('md5');
         hash.update(this.path.join('\n'));
-        return hash.digest('hex');*/
-        return this.path.join('.').replace(/-/g, '');
+        return hash.digest('hex');
     }
 
     get value(): T {
