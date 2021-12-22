@@ -5,11 +5,15 @@ export class PlantUmlKubernetesCluster extends PlantUmlObject {
     constructor(
         public readonly id: string,
         public readonly cluster: KubernetesCluster,
+        public readonly showDetails: boolean,
     ) {
         super(id);
     }
 
     private renderProps(): string {
+        if (!this.showDetails) {
+            return '';
+        }
         const props = [];
         if (this.cluster.distribution) {
             props.push(
@@ -25,9 +29,11 @@ export class PlantUmlKubernetesCluster extends PlantUmlObject {
     protected get header(): string {
         return `
         ${this.renderProps()}
-        Deployment_Node_L("${this.id}", "${
-            this.cluster.title
-        }", "Kubernetes Cluster", "", $sprite=kubernetes, $tags=kubernetesCluster){
+        Deployment_Node("${this.id}", "${
+            this.showDetails ? this.cluster.title : '***'
+        }", "Kubernetes Cluster", "", $sprite=kubernetes, $tags="kubernetesCluster${
+            !this.showDetails ? ',hidden' : ''
+        }"){
         `;
     }
 

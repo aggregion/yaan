@@ -37,10 +37,12 @@ export interface GraphRelation<T extends RelationType> {
 
 export interface GraphServer {
     server: Server;
+    showHardwareDetails: boolean;
 }
 
 export interface GraphKubernetesCluster {
     kubernetesCluster: KubernetesCluster;
+    showDetails: boolean;
 }
 
 export interface GraphPresentation {
@@ -50,6 +52,7 @@ export interface GraphPresentation {
     deployments: Record<
         string,
         {
+            showDetails: boolean;
             deployment: Deployment;
             groups: Record<
                 string,
@@ -58,6 +61,7 @@ export interface GraphPresentation {
                     components: Record<
                         string,
                         {
+                            show: boolean;
                             component: SolutionComponent;
                             ports: Record<string, SolutionPort>;
                         }
@@ -155,14 +159,18 @@ export const createGraph = (project: ProjectContainer) => {
         });
         for (const presDepValue of pres.deployments) {
             let depName;
+            let hideComponents;
             if (typeof presDepValue === 'string') {
                 depName = presDepValue;
+                hideComponents = false;
             } else {
                 depName = presDepValue.name;
+                hideComponents = presDepValue.showOnlyExternallyConnected;
             }
             const dep = getFromProject('deployments', depName);
             const gunDep = gunPres.get('deployments').get(depName).put({
                 deployment: dep,
+                showDetails: !hideComponents,
                 groups: {},
             });
             for (const [dgName, dg] of Object.entries(dep.deploymentGroups)) {
@@ -181,7 +189,10 @@ export const createGraph = (project: ProjectContainer) => {
                             .get('kubernetesClusters')
                             .get(dg.cluster);
                         if (!gunCluster.defined()) {
-                            gunCluster.put({ kubernetesCluster: cluster });
+                            gunCluster.put({
+                                kubernetesCluster: cluster,
+                                showDetails: !hideComponents,
+                            });
                         }
                         for (const [srvName, srv] of Object.entries(
                             cluster.servers,
@@ -190,7 +201,10 @@ export const createGraph = (project: ProjectContainer) => {
                             const gunServer = gunPres
                                 .get('servers')
                                 .get(srvName)
-                                .put({ server: server });
+                                .put({
+                                    server: server,
+                                    showHardwareDetails: !hideComponents,
+                                });
                             gunPres.get('relations').set({
                                 src: gunCluster,
                                 dest: gunServer,
@@ -207,7 +221,10 @@ export const createGraph = (project: ProjectContainer) => {
                         const gunServer = gunPres
                             .get('servers')
                             .get(dg.server)
-                            .put({ server: server });
+                            .put({
+                                server: server,
+                                showHardwareDetails: !hideComponents,
+                            });
                         dgContainer = gunServer;
                         break;
                 }
@@ -285,13 +302,20 @@ export const createGraph = (project: ProjectContainer) => {
                         const gunComp = gunDg
                             .get('components')
                             .get(compName)
-                            .put({ component: comp, ports: {} });
+                            .put({
+                                show: !hideComponents,
+                                component: comp,
+                                ports: {},
+                            });
                         for (const [portName, port] of Object.entries(ports)) {
                             gunComp.get('ports').get(portName).put(port);
                         }
-                        if (comp.uses) {
+                        if (!hideComponents && comp.uses) {
                             for (const compUsage of comp.uses) {
                                 if (typeof compUsage === 'string') {
+                                    if (!componentsToDeploy[compUsage]) {
+                                        continue;
+                                    }
                                     const usingComponent =
                                         solution.components[compUsage];
                                     if (!usingComponent) {
@@ -320,6 +344,9 @@ export const createGraph = (project: ProjectContainer) => {
                                 } else {
                                     const usingComponent =
                                         solution.components[compUsage.name];
+                                    if (!componentsToDeploy[compUsage.name]) {
+                                        continue;
+                                    }
                                     if (!usingComponent) {
                                         throw new Error(
                                             `Using component is not defined: ${compUsage.name}`,
@@ -358,7 +385,7 @@ export const createGraph = (project: ProjectContainer) => {
                                 }
                             }
                         }
-                        if (componentConnections[compName]) {
+                        if (!hideComponents && componentConnections[compName]) {
                             for (const connection of componentConnections[
                                 compName
                             ]) {
@@ -401,6 +428,7 @@ export const createGraph = (project: ProjectContainer) => {
                         ) {
                             return;
                         }
+                        comp.get('show').put(true);
                         if (defRel.port) {
                             comp.get('ports').each((port, portName) => {
                                 if (portName === defRel.port) {

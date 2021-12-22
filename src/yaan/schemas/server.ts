@@ -5,7 +5,7 @@ export interface ServerCpu {
 
 export interface ServerDisk {
     size?: string;
-    mountPoint?: string;
+    devPath?: string;
     customProps?: Record<string, any>;
 }
 

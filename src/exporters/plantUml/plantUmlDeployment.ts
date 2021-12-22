@@ -5,15 +5,16 @@ export class PlantUmlDeployment extends PlantUmlObject {
     constructor(
         public readonly id: string,
         public readonly deployment: Deployment,
+        public readonly showDetails: boolean,
     ) {
         super(id);
     }
 
     protected get header(): string {
         return `
-        Deployment_Node_L("${this.id}", "${this.deployment.title || ''}", "${
+        Deployment_Node("${this.id}", "${this.deployment.title || ''}", "${
             this.deployment.description || ''
-        }", "", $tags=deployment){
+        }", "", $tags="deployment${!this.showDetails ? ',hidden' : ''}"){
         `;
     }
 

@@ -426,25 +426,18 @@
     "PresentationDeploymentDetailed": {
       "additionalProperties": false,
       "properties": {
-        "externalConnectionsPolicy": {
-          "$ref": "#/definitions/PresentationExternalConnectionsPolicy"
-        },
         "name": {
           "type": "string"
+        },
+        "showOnlyExternallyConnected": {
+          "type": "boolean"
         }
       },
       "required": [
-        "name"
+        "name",
+        "showOnlyExternallyConnected"
       ],
       "type": "object"
-    },
-    "PresentationExternalConnectionsPolicy": {
-      "enum": [
-        "Show",
-        "Hide",
-        "Mask"
-      ],
-      "type": "string"
     },
     "Provider": {
       "additionalProperties": false,
@@ -632,7 +625,7 @@
         "customProps": {
           "type": "object"
         },
-        "mountPoint": {
+        "devPath": {
           "type": "string"
         },
         "size": {

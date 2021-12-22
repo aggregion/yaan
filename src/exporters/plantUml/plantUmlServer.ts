@@ -8,16 +8,23 @@ import {
 } from '../../yaan/schemas/server';
 
 export class PlantUmlServer extends PlantUmlObject {
-    constructor(public readonly id: string, public readonly server: Server) {
+    constructor(
+        public readonly id: string,
+        public readonly server: Server,
+        public readonly showDetails: boolean,
+    ) {
         super(id);
     }
 
     private renderCpus() {
+        if (!this.showDetails) {
+            return '';
+        }
         if (this.server.hardware?.cpus) {
             const cpusStr = this.server.hardware?.cpus
                 .map(
                     (cpu: ServerCpu, i: number) => `
-                Deployment_Node_L("${this.id}/cpus/${i}", "CPU #${i}", "${
+                Deployment_Node("${this.id}/cpus/${i}", "CPU #${i}", "${
                         cpu.model || ''
                     }", "${cpu.cores ? cpu.cores + ' cores' : ''}"){
                 }
@@ -34,12 +41,15 @@ export class PlantUmlServer extends PlantUmlObject {
     }
 
     private renderDisks() {
+        if (!this.showDetails) {
+            return '';
+        }
         if (this.server.hardware?.disks) {
             const str = this.server.hardware?.disks
                 .map(
                     (disk: ServerDisk, i: number) => `
-                Deployment_Node_L("${this.id}/disks/${i}", "${
-                        disk.mountPoint || ''
+                Deployment_Node("${this.id}/disks/${i}", "${
+                        disk.devPath || ''
                     }", "${disk.size || ''}"){
                 }
             `,
@@ -55,6 +65,9 @@ export class PlantUmlServer extends PlantUmlObject {
     }
 
     private renderFirewall() {
+        if (!this.showDetails) {
+            return '';
+        }
         if (this.server.firewall) {
             const rules = {
                 inbound: [],
@@ -120,7 +133,7 @@ export class PlantUmlServer extends PlantUmlObject {
                                 `AddProperty("${rule.hosts}", "${rule.ports}")`,
                         )
                         .join('\n')}
-                    Deployment_Node_L("${this.id}/firewall/inbound", "Inbound"){
+                    Deployment_Node("${this.id}/firewall/inbound", "Inbound"){
                     }
                     AddProperty("Host(s)", "Port(s)")
                     ${rules.outbound
@@ -129,9 +142,7 @@ export class PlantUmlServer extends PlantUmlObject {
                                 `AddProperty("${rule.hosts}", "${rule.ports}")`,
                         )
                         .join('\n')}
-                    Deployment_Node_L("${
-                        this.id
-                    }/firewall/outbound", "Outbound"){
+                    Deployment_Node("${this.id}/firewall/outbound", "Outbound"){
                     }
                 }`;
             }
@@ -140,6 +151,9 @@ export class PlantUmlServer extends PlantUmlObject {
     }
 
     private renderProps() {
+        if (!this.showDetails) {
+            return '';
+        }
         return `
         AddProperty("Type", "${this.server.type || '-'}")
         AddProperty("OS Type", "${this.server.osType || '-'}")
@@ -159,9 +173,13 @@ export class PlantUmlServer extends PlantUmlObject {
     protected get header(): string {
         return `
         ${this.renderProps()}
-        Deployment_Node_L("${this.id}", "${this.server.title}", "Server", "${
+        Deployment_Node("${this.id}", "${
+            this.showDetails ? this.server.title : '***'
+        }", "Server", "${
             this.server.description || ''
-        }", $sprite=server, $tags=server){
+        }", $sprite=server, $tags="server${
+            !this.showDetails ? ',hidden' : ''
+        }"){
           ${this.renderCpus()}
           ${this.renderDisks()}
           ${this.renderFirewall()}

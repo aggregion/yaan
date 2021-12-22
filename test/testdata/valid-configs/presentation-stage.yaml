@@ -7,4 +7,4 @@ spec:
   title: "Production environment presentation"
   deployments:
     - name: stage
-      externalConnectionsPolicy: Show # Automatically include external connections deployments
+      showOnlyExternallyConnected: true

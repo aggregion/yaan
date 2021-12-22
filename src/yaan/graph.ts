@@ -88,6 +88,19 @@ export class GraphNode<T> {
         objectPath.set(this.baseObject, this.path, undefined);
     }
 
+    unset<K extends keyof T>(name: K) {
+        const val = objectPath.get(this.baseObject, this.path);
+        if (Array.isArray(val)) {
+            objectPath.get(
+                this.baseObject,
+                this.path,
+                val.filter((v, i) => i !== (name as any)),
+            );
+        } else {
+            this.get(name).delete();
+        }
+    }
+
     find(
         test: (v: ArrayElementOrUnknown<T>) => boolean,
     ): GraphNode<ArrayElementOrUnknown<T>> | null {

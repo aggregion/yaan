@@ -28,7 +28,11 @@ export class PlantUml extends PlantUmlObject {
         this.children.push(presObj);
         pres.get('servers').each((server) => {
             presObj.children.push(
-                new PlantUmlServer(server.key, server.get('server').value),
+                new PlantUmlServer(
+                    server.key,
+                    server.get('server').value,
+                    server.get('showHardwareDetails').value,
+                ),
             );
         });
         pres.get('kubernetesClusters').each((cluster) => {
@@ -36,6 +40,7 @@ export class PlantUml extends PlantUmlObject {
                 new PlantUmlKubernetesCluster(
                     cluster.key,
                     cluster.get('kubernetesCluster').value,
+                    cluster.get('showDetails').value,
                 ),
             );
         });
@@ -43,15 +48,20 @@ export class PlantUml extends PlantUmlObject {
             const plantDep = new PlantUmlDeployment(
                 deployment.key,
                 deployment.get('deployment').value,
+                deployment.get('showDetails').value,
             );
             presObj.children.push(plantDep);
             deployment.get('groups').each((group) => {
                 const plantGroup = new PlantUmlDeploymentGroup(
                     group.key,
                     group.get('deploymentGroup').value,
+                    deployment.get('showDetails').value,
                 );
                 plantDep.children.push(plantGroup);
                 group.get('components').each((component) => {
+                    if (!component.value.show) {
+                        return;
+                    }
                     const plantComponent = new PlantUmlComponent(
                         component.key,
                         component.get('component').value,
@@ -94,13 +104,19 @@ export class PlantUml extends PlantUmlObject {
         !include FONTAWESOME1/hdd_o.puml
         !include FONTAWESOME1/lock.puml
         !include DEVICONS/kubernetes.puml
-        
+                        
         AddElementTag("fallback", $bgColor="#c0c0c0")
         AddRelTag("fallback", $textColor="#c0c0c0", $lineColor="#438DD5")
+        AddRelTag("uses-external", $textColor="#3b52ff", $lineColor="#3b52ff", $lineStyle=BoldLine())
+        AddRelTag("uses-internal", $textColor="#333333", $lineColor="#333333", $lineStyle=DashedLine())
+        AddRelTag("deployed-on", $textColor="#29a300", $lineColor="#29a300", $lineStyle=DottedLine())
+        AddRelTag("clustered-on", $textColor="#29a300", $lineColor="#29a300", $lineStyle=DottedLine())
+
         AddElementTag("deploymentGroup", $bgColor="#abd9ff")
         AddElementTag("deployment", $shadowing = true)
         AddElementTag("server", $shadowing = true, $bgColor="#e6e6e6")
         AddElementTag("kubernetesCluster", $shadowing = true)
+        AddElementTag("hidden", $shadowing = false, $shape = EightSidedShape(), $bgColor="#444444")
 
         
         WithoutPropertyHeader()

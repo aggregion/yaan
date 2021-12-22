@@ -12,7 +12,9 @@ export class PlantUmlRelation extends PlantUmlObject {
 
     protected get header(): string {
         return `
-        Rel("${this.fromKey}", "${this.toKey}", "${this.title || ' '}", "")
+        Rel("${this.fromKey}", "${this.toKey}", "${
+            this.title || ' '
+        }", $tags="${this.type}")
         `;
     }
 

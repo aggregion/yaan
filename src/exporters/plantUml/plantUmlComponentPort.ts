@@ -24,7 +24,7 @@ export class PlantUmlComponentPort extends PlantUmlObject {
                   };
         return `
         AddProperty("${port.protocol || 'TCP'}", "${port.number}")
-        Deployment_Node_L("${this.id}", "${
+        Deployment_Node("${this.id}", "${
             this.portName || port.description
         }", "Port", "${port.description || ''}") {
         `;

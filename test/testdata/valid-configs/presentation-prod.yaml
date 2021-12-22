@@ -7,4 +7,4 @@ spec:
   title: "Production environment presentation"
   deployments:
     - name: prod
-      externalConnectionsPolicy: Mask  # Show external connections, but mask them deployment details
+      showOnlyExternallyConnected: true

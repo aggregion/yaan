@@ -18,7 +18,7 @@ spec:
     memory: 128Gi
     disks:
       - size: 500Gi
-        mountPoint: "/dev/sda"
+        devPath: "/dev/sda"
   firewall:
     inboundPorts:
       nginx: 443

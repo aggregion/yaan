@@ -10,7 +10,7 @@ export class PlantUmlPresentation extends PlantUmlObject {
     }
 
     protected get header(): string {
-        return `Deployment_Node_L("${this.id}", "${this.presentation.title}", ""){`;
+        return `Deployment_Node("${this.id}", "${this.presentation.title}", ""){`;
     }
 
     protected get footer(): string {
