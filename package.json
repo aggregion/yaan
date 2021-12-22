@@ -1,7 +1,7 @@
 {
   "name": "@aggregion/yaan",
   "description": "Yet Another Architecture Notation",
-  "version": "0.2.6",
+  "version": "0.2.8",
   "author": "Denis Bezrukov @anthrax63",
   "bin": {
     "yaan": "./bin/run"
@@ -41,7 +41,8 @@
     "/bin",
     "/lib",
     "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
+    "/oclif.manifest.json",
+    "schema.json"
   ],
   "homepage": "https://github.com/aggregion/yaan",
   "keywords": [
@@ -62,7 +63,7 @@
     "posttest": "eslint . --ext .ts",
     "eslint": "eslint . --ext .ts",
     "eslint:fix": "eslint . --ext .ts --fix",
-    "prepack": "rm -rf lib && tsc -b tsconfig.build.json && oclif-dev manifest && oclif-dev readme && npm run schema && npx cpy schema.json lib",
+    "prepack": "rm -rf lib && tsc -b tsconfig.build.json && oclif-dev manifest && oclif-dev readme && npm run schema",
     "version": "oclif-dev readme && git add README.md",
     "schema": "ts-json-schema-generator --strict-tuples -t '*' -p 'src/yaan/schemas/configContainer.ts' -o schema.json",
     "test": "jest",
@@ -78,9 +79,9 @@
     "@oclif/errors": "1.3.5",
     "@tiagonapoli/oclif-plugin-spaced-commands": "1.0.1",
     "ajv": "8.8.2",
+    "glob": "7.2.0",
     "object-path": "0.11.8",
     "tslib": "1.14.1",
-    "yaml": "1.10.2",
-    "glob": "7.2.0"
+    "yaml": "1.10.2"
   }
 }
