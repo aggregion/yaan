@@ -1,7 +1,7 @@
 {
-  "name": "yaan",
+  "name": "@aggregion/yaan",
   "description": "Yet Another Architecture Notation",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Denis Bezrukov @anthrax63",
   "bin": {
     "yaan": "./bin/run"
@@ -62,6 +62,7 @@
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint . --ext .ts",
+    "eslint": "eslint . --ext .ts",
     "eslint:fix": "eslint . --ext .ts --fix",
     "prepack": "rm -rf lib && tsc -b tsconfig.build.json && oclif-dev manifest && oclif-dev readme && npm run schema && npx cpy schema.json lib",
     "version": "oclif-dev readme && git add README.md",
