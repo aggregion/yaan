@@ -8,19 +8,19 @@ export interface DeploymentExternalConnection {
 }
 
 export interface DeploymentComponentDetailed {
-    disabled?: false;
+    disabled?: boolean;
     name: string;
     externalConnections?: DeploymentExternalConnection[];
 }
 
-export interface DeploymentComponentDisabled {
-    name: string;
-    disabled: true;
+export interface DeploymentComponentFromGroup {
+    fromGroup: string;
+    disabled?: boolean;
 }
 
 export type DeploymentComponent =
+    | DeploymentComponentFromGroup
     | DeploymentComponentDetailed
-    | DeploymentComponentDisabled
     | '*'
     | string;
 
@@ -35,6 +35,7 @@ export interface KubernetesClusterDeploymentGroup
     type: 'KubernetesCluster';
     cluster: string;
     clusterNamespace?: string;
+    nodes?: string[];
 }
 
 export interface ServerDeploymentGroup extends CommonDeploymentGroupProps {

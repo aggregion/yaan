@@ -15,6 +15,9 @@
           "properties": {
             "name": {
               "type": "string"
+            },
+            "organization": {
+              "type": "string"
             }
           },
           "required": [
@@ -51,6 +54,12 @@
         },
         {
           "$ref": "#/definitions/PresentationContainer"
+        },
+        {
+          "$ref": "#/definitions/OrganizationContainer"
+        },
+        {
+          "$ref": "#/definitions/PersonContainer"
         }
       ]
     },
@@ -79,10 +88,10 @@
     "DeploymentComponent": {
       "anyOf": [
         {
-          "$ref": "#/definitions/DeploymentComponentDetailed"
+          "$ref": "#/definitions/DeploymentComponentFromGroup"
         },
         {
-          "$ref": "#/definitions/DeploymentComponentDisabled"
+          "$ref": "#/definitions/DeploymentComponentDetailed"
         },
         {
           "const": "*",
@@ -97,7 +106,6 @@
       "additionalProperties": false,
       "properties": {
         "disabled": {
-          "const": false,
           "type": "boolean"
         },
         "externalConnections": {
@@ -115,20 +123,18 @@
       ],
       "type": "object"
     },
-    "DeploymentComponentDisabled": {
+    "DeploymentComponentFromGroup": {
       "additionalProperties": false,
       "properties": {
         "disabled": {
-          "const": true,
           "type": "boolean"
         },
-        "name": {
+        "fromGroup": {
           "type": "string"
         }
       },
       "required": [
-        "name",
-        "disabled"
+        "fromGroup"
       ],
       "type": "object"
     },
@@ -147,6 +153,9 @@
           "additionalProperties": false,
           "properties": {
             "name": {
+              "type": "string"
+            },
+            "organization": {
               "type": "string"
             }
           },
@@ -211,7 +220,9 @@
         "Provider",
         "Server",
         "Deployment",
-        "Presentation"
+        "Presentation",
+        "Organization",
+        "Person"
       ],
       "type": "string"
     },
@@ -223,6 +234,12 @@
         },
         "KubernetesCluster": {
           "$ref": "#/definitions/KubernetesCluster"
+        },
+        "Organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "Person": {
+          "$ref": "#/definitions/Person"
         },
         "Presentation": {
           "$ref": "#/definitions/Presentation"
@@ -243,7 +260,9 @@
         "Provider",
         "Server",
         "Deployment",
-        "Presentation"
+        "Presentation",
+        "Organization",
+        "Person"
       ],
       "type": "object"
     },
@@ -291,6 +310,9 @@
           "properties": {
             "name": {
               "type": "string"
+            },
+            "organization": {
+              "type": "string"
             }
           },
           "required": [
@@ -322,6 +344,12 @@
         "components": {
           "items": {
             "$ref": "#/definitions/DeploymentComponent"
+          },
+          "type": "array"
+        },
+        "nodes": {
+          "items": {
+            "type": "string"
           },
           "type": "array"
         },
@@ -359,6 +387,115 @@
       ],
       "type": "object"
     },
+    "Organization": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "type": "object"
+    },
+    "OrganizationContainer": {
+      "additionalProperties": false,
+      "description": "Describes organization",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "Organization",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "organization": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "type": "object"
+        },
+        "spec": {
+          "$ref": "#/definitions/Organization"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
+    "Person": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "organization": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "type": "object"
+    },
+    "PersonContainer": {
+      "additionalProperties": false,
+      "description": "Describes person",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "Person",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "organization": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "type": "object"
+        },
+        "spec": {
+          "$ref": "#/definitions/Person"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
     "Presentation": {
       "additionalProperties": false,
       "properties": {
@@ -393,6 +530,9 @@
           "additionalProperties": false,
           "properties": {
             "name": {
+              "type": "string"
+            },
+            "organization": {
               "type": "string"
             }
           },
@@ -469,6 +609,9 @@
           "additionalProperties": false,
           "properties": {
             "name": {
+              "type": "string"
+            },
+            "organization": {
               "type": "string"
             }
           },
@@ -554,6 +697,9 @@
           "additionalProperties": false,
           "properties": {
             "name": {
+              "type": "string"
+            },
+            "organization": {
               "type": "string"
             }
           },
@@ -751,6 +897,13 @@
           "description": "Solution components like services, databases, queues etc.",
           "type": "object"
         },
+        "groups": {
+          "additionalProperties": {
+            "$ref": "#/definitions/SolutionComponentGroup"
+          },
+          "description": "Groups of components",
+          "type": "object"
+        },
         "title": {
           "description": "Human readable title of solution",
           "type": "string"
@@ -799,6 +952,25 @@
           "type": "object"
         }
       },
+      "type": "object"
+    },
+    "SolutionComponentGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "components": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "components"
+      ],
       "type": "object"
     },
     "SolutionComponentUsage": {
@@ -866,6 +1038,9 @@
           "properties": {
             "name": {
               "type": "string"
+            },
+            "organization": {
+              "type": "string"
             }
           },
           "required": [
@@ -922,28 +1097,6 @@
         },
         {
           "type": "string"
-        }
-      ]
-    },
-    "YaanEntity": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Solution"
-        },
-        {
-          "$ref": "#/definitions/KubernetesCluster"
-        },
-        {
-          "$ref": "#/definitions/Provider"
-        },
-        {
-          "$ref": "#/definitions/Server"
-        },
-        {
-          "$ref": "#/definitions/Deployment"
-        },
-        {
-          "$ref": "#/definitions/Presentation"
         }
       ]
     }

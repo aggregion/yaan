@@ -18,4 +18,10 @@ export class Project implements ProjectContainer {
         new Map();
     public readonly solutions: Map<string, EntityTypeBinding['Solution']> =
         new Map();
+    public readonly organizations: Map<
+        string,
+        EntityTypeBinding['Organization']
+    > = new Map();
+    public readonly persons: Map<string, EntityTypeBinding['Person']> =
+        new Map();
 }

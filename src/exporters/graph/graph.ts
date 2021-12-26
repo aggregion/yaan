@@ -1,7 +1,13 @@
 import { ProjectContainer } from '../../yaan/types';
-import { SolutionComponent, SolutionPort } from '../../yaan/schemas/solution';
+import {
+    SolutionComponent,
+    SolutionComponentGroup,
+    SolutionPort,
+} from '../../yaan/schemas/solution';
 import {
     Deployment,
+    DeploymentComponentDetailed,
+    DeploymentComponentFromGroup,
     DeploymentExternalConnection,
     DeploymentGroup,
 } from '../../yaan/schemas/deployment';
@@ -58,11 +64,18 @@ export interface GraphPresentation {
                 string,
                 {
                     deploymentGroup: DeploymentGroup;
+                    componentGroups: Record<
+                        string,
+                        {
+                            group: SolutionComponentGroup;
+                        }
+                    >;
                     components: Record<
                         string,
                         {
                             show: boolean;
                             component: SolutionComponent;
+                            componentGroupName?: string;
                             ports: Record<string, SolutionPort>;
                         }
                     >;
@@ -149,6 +162,7 @@ export const createGraph = (project: ProjectContainer) => {
             srcDeployment: string;
             srcGroup: string;
             srcComponent: string;
+            description?: string;
         }[] = [];
         const gunPres = graph.get('presentations').get(presName).put({
             relations: [],
@@ -176,6 +190,7 @@ export const createGraph = (project: ProjectContainer) => {
             for (const [dgName, dg] of Object.entries(dep.deploymentGroups)) {
                 const gunDg = gunDep.get('groups').get(dgName).put({
                     deploymentGroup: dg,
+                    componentGroups: {},
                     components: {},
                 });
                 let dgContainer;
@@ -238,6 +253,31 @@ export const createGraph = (project: ProjectContainer) => {
                 });
                 const solution = getFromProject('solutions', dg.solution);
                 if (dg.components) {
+                    const groupsMap: Record<
+                        string,
+                        { name: string; value: SolutionComponentGroup }
+                    > = {};
+                    if (solution.groups) {
+                        Object.entries(solution.groups).forEach(([k, v]) => {
+                            v.components.forEach((c) => {
+                                if (groupsMap[c]) {
+                                    if (groupsMap[c].name === k) {
+                                        throw new Error(
+                                            `Component "${c}" included in group "${k}" several times.`,
+                                        );
+                                    } else {
+                                        throw new Error(
+                                            `Component "${c}" included in multiple groups.`,
+                                        );
+                                    }
+                                }
+                                groupsMap[c] = { name: k, value: v };
+                                gunDg.get('componentGroups').get(k).put({
+                                    group: v,
+                                });
+                            });
+                        });
+                    }
                     const componentsToDeploy: Record<
                         string,
                         SolutionComponent & {
@@ -266,19 +306,47 @@ export const createGraph = (project: ProjectContainer) => {
                                 componentsToDeploy[compValue] = val;
                             }
                         } else {
-                            if (compValue.disabled) {
-                                delete componentsToDeploy[compValue.name];
-                            } else {
-                                const val = solution.components[compValue.name];
-                                if (!val) {
+                            if (compValue.hasOwnProperty('fromGroup')) {
+                                const cv =
+                                    compValue as DeploymentComponentFromGroup;
+                                const group =
+                                    solution.groups &&
+                                    solution.groups[cv.fromGroup];
+                                if (!group) {
                                     throw new Error(
-                                        `Undefined component: ${compValue.name}`,
+                                        `Unknown group ${cv.fromGroup}`,
                                     );
                                 }
-                                componentsToDeploy[compValue.name] = val;
-                                if (compValue.externalConnections) {
-                                    componentConnections[compValue.name] =
-                                        compValue.externalConnections;
+                                for (const compName of group.components) {
+                                    if (compValue.disabled) {
+                                        delete componentsToDeploy[compName];
+                                        continue;
+                                    }
+                                    const val = solution.components[compName];
+                                    if (!val) {
+                                        throw new Error(
+                                            `Undefined component: ${compValue}`,
+                                        );
+                                    }
+                                    componentsToDeploy[compName] = val;
+                                }
+                            } else {
+                                const cv =
+                                    compValue as DeploymentComponentDetailed;
+                                if (compValue.disabled) {
+                                    delete componentsToDeploy[cv.name];
+                                } else {
+                                    const val = solution.components[cv.name];
+                                    if (!val) {
+                                        throw new Error(
+                                            `Undefined component: ${cv.name}`,
+                                        );
+                                    }
+                                    componentsToDeploy[cv.name] = val;
+                                    if (cv.externalConnections) {
+                                        componentConnections[cv.name] =
+                                            cv.externalConnections;
+                                    }
                                 }
                             }
                         }
@@ -305,6 +373,9 @@ export const createGraph = (project: ProjectContainer) => {
                             .put({
                                 show: !hideComponents,
                                 component: comp,
+                                componentGroupName:
+                                    groupsMap[compName] &&
+                                    groupsMap[compName].name,
                                 ports: {},
                             });
                         for (const [portName, port] of Object.entries(ports)) {
@@ -398,6 +469,7 @@ export const createGraph = (project: ProjectContainer) => {
                                     srcGroup: dgName,
                                     srcDeployment: depName,
                                     srcComponent: compName,
+                                    description: connection.description,
                                 });
                             }
                         }
@@ -436,7 +508,9 @@ export const createGraph = (project: ProjectContainer) => {
                                         src: defRel.src,
                                         dest: port,
                                         type: RelationType.UsesExternal,
-                                        props: {},
+                                        props: {
+                                            description: defRel.description,
+                                        },
                                     });
                                 }
                             });
@@ -445,7 +519,9 @@ export const createGraph = (project: ProjectContainer) => {
                                 src: defRel.src,
                                 dest: comp,
                                 type: RelationType.UsesExternal,
-                                props: {},
+                                props: {
+                                    description: defRel.description,
+                                },
                             });
                         }
                     });

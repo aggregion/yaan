@@ -75,6 +75,11 @@ export interface SolutionComponent {
     kind?: string;
 }
 
+export interface SolutionComponentGroup {
+    title: string;
+    components: string[];
+}
+
 export interface Solution {
     /**
      * Human readable title of solution
@@ -85,4 +90,9 @@ export interface Solution {
      * Solution components like services, databases, queues etc.
      */
     components: Record<string, SolutionComponent>;
+
+    /**
+     * Groups of components
+     */
+    groups?: Record<string, SolutionComponentGroup>;
 }

@@ -4,15 +4,8 @@ import { Provider } from './provider';
 import { Server } from './server';
 import { Deployment } from './deployment';
 import { Presentation } from './presentation';
-
-export enum EntityType {
-    Solution = 'Solution',
-    KubernetesCluster = 'KubernetesCluster',
-    Provider = 'Provider',
-    Server = 'Server',
-    Deployment = 'Deployment',
-    Presentation = 'Presentation',
-}
+import { Organization } from './organization';
+import { Person } from './person';
 
 export interface EntityTypeBinding {
     Solution: Solution;
@@ -21,21 +14,18 @@ export interface EntityTypeBinding {
     Server: Server;
     Deployment: Deployment;
     Presentation: Presentation;
+    Organization: Organization;
+    Person: Person;
 }
 
-export type YaanEntity =
-    | Solution
-    | KubernetesCluster
-    | Provider
-    | Server
-    | Deployment
-    | Presentation;
+export type EntityType = keyof EntityTypeBinding;
 
 export interface CommonConfigContainerAttributes {
     apiVersion: string;
     kind: EntityType;
     metadata: {
         name: string;
+        organization?: string;
     };
     spec: any;
 }
@@ -44,7 +34,7 @@ export interface CommonConfigContainerAttributes {
  * Describes application solution with it's components
  */
 export interface SolutionContainer extends CommonConfigContainerAttributes {
-    kind: EntityType.Solution;
+    kind: 'Solution';
     spec: Solution;
 }
 
@@ -53,7 +43,7 @@ export interface SolutionContainer extends CommonConfigContainerAttributes {
  */
 export interface KubernetesClusterContainer
     extends CommonConfigContainerAttributes {
-    kind: EntityType.KubernetesCluster;
+    kind: 'KubernetesCluster';
     spec: KubernetesCluster;
 }
 
@@ -61,7 +51,7 @@ export interface KubernetesClusterContainer
  * Describes provider like AWS, Google Cloud etc.
  */
 export interface ProviderContainer extends CommonConfigContainerAttributes {
-    kind: EntityType.Provider;
+    kind: 'Provider';
     spec: Provider;
 }
 
@@ -69,7 +59,7 @@ export interface ProviderContainer extends CommonConfigContainerAttributes {
  * Describes specific server or server's pool
  */
 export interface ServerContainer extends CommonConfigContainerAttributes {
-    kind: EntityType.Server;
+    kind: 'Server';
     spec: Server;
 }
 
@@ -77,7 +67,7 @@ export interface ServerContainer extends CommonConfigContainerAttributes {
  * Describes deployment
  */
 export interface DeploymentContainer extends CommonConfigContainerAttributes {
-    kind: EntityType.Deployment;
+    kind: 'Deployment';
     spec: Deployment;
 }
 
@@ -85,8 +75,24 @@ export interface DeploymentContainer extends CommonConfigContainerAttributes {
  * Describes presentation view
  */
 export interface PresentationContainer extends CommonConfigContainerAttributes {
-    kind: EntityType.Presentation;
+    kind: 'Presentation';
     spec: Presentation;
+}
+
+/**
+ * Describes organization
+ */
+export interface OrganizationContainer extends CommonConfigContainerAttributes {
+    kind: 'Organization';
+    spec: Organization;
+}
+
+/**
+ * Describes person
+ */
+export interface PersonContainer extends CommonConfigContainerAttributes {
+    kind: 'Person';
+    spec: Person;
 }
 
 export type ConfigContainer =
@@ -95,4 +101,6 @@ export type ConfigContainer =
     | ProviderContainer
     | ServerContainer
     | DeploymentContainer
-    | PresentationContainer;
+    | PresentationContainer
+    | OrganizationContainer
+    | PersonContainer;

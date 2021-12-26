@@ -9,6 +9,7 @@ import { PlantUmlDeploymentGroup } from './plantUmlDeploymentGroup';
 import { PlantUmlComponent } from './plantUmlComponent';
 import { PlantUmlComponentPort } from './plantUmlComponentPort';
 import { PlantUmlRelation } from './plantUmlRelation';
+import { PlantUmlComponentGroup } from './plantUmlComponentGroup';
 
 export class PlantUml extends PlantUmlObject {
     constructor(
@@ -58,6 +59,8 @@ export class PlantUml extends PlantUmlObject {
                     deployment.get('showDetails').value,
                 );
                 plantDep.children.push(plantGroup);
+                const componentGroups: Record<string, PlantUmlComponentGroup> =
+                    {};
                 group.get('components').each((component) => {
                     if (!component.value.show) {
                         return;
@@ -66,7 +69,26 @@ export class PlantUml extends PlantUmlObject {
                         component.key,
                         component.get('component').value,
                     );
-                    plantGroup.children.push(plantComponent);
+                    if (component.value.componentGroupName) {
+                        const groupName = component.value.componentGroupName;
+                        if (!componentGroups[groupName]) {
+                            const g = group
+                                .get('componentGroups')
+                                .get(groupName);
+                            const plantComponentGroup =
+                                new PlantUmlComponentGroup(
+                                    g.key,
+                                    g.value.group,
+                                );
+                            componentGroups[groupName] = plantComponentGroup;
+                            plantGroup.children.push(plantComponentGroup);
+                        }
+                        componentGroups[groupName].children.push(
+                            plantComponent,
+                        );
+                    } else {
+                        plantGroup.children.push(plantComponent);
+                    }
                     component.get('ports').each((port, portName) => {
                         const plantPort = new PlantUmlComponentPort(
                             port.key,
