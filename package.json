@@ -1,7 +1,7 @@
 {
   "name": "@aggregion/yaan",
   "description": "Yet Another Architecture Notation",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Denis Bezrukov @anthrax63",
   "bin": {
     "yaan": "./bin/run"
@@ -65,7 +65,7 @@
     "eslint:fix": "eslint . --ext .ts --fix",
     "prepack": "rm -rf lib && tsc -b tsconfig.build.json && oclif-dev manifest && oclif-dev readme && npm run schema",
     "version": "oclif-dev readme && git add README.md",
-    "schema": "ts-json-schema-generator --strict-tuples -t '*' -p 'src/yaan/schemas/configContainer.ts' -o schema.json",
+    "schema": "ts-json-schema-generator --strict-tuples -t ConfigContainer -p 'src/yaan/schemas/configContainer.ts' --no-top-ref -o schema.json",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",

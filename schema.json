@@ -1,68 +1,32 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "anyOf": [
+    {
+      "$ref": "#/definitions/SolutionContainer"
+    },
+    {
+      "$ref": "#/definitions/KubernetesClusterContainer"
+    },
+    {
+      "$ref": "#/definitions/ProviderContainer"
+    },
+    {
+      "$ref": "#/definitions/ServerContainer"
+    },
+    {
+      "$ref": "#/definitions/DeploymentContainer"
+    },
+    {
+      "$ref": "#/definitions/PresentationContainer"
+    },
+    {
+      "$ref": "#/definitions/OrganizationContainer"
+    },
+    {
+      "$ref": "#/definitions/PersonContainer"
+    }
+  ],
   "definitions": {
-    "CommonConfigContainerAttributes": {
-      "additionalProperties": false,
-      "properties": {
-        "apiVersion": {
-          "type": "string"
-        },
-        "kind": {
-          "$ref": "#/definitions/EntityType"
-        },
-        "metadata": {
-          "additionalProperties": false,
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "organization": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "name"
-          ],
-          "type": "object"
-        },
-        "spec": {}
-      },
-      "required": [
-        "apiVersion",
-        "kind",
-        "metadata",
-        "spec"
-      ],
-      "type": "object"
-    },
-    "ConfigContainer": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/SolutionContainer"
-        },
-        {
-          "$ref": "#/definitions/KubernetesClusterContainer"
-        },
-        {
-          "$ref": "#/definitions/ProviderContainer"
-        },
-        {
-          "$ref": "#/definitions/ServerContainer"
-        },
-        {
-          "$ref": "#/definitions/DeploymentContainer"
-        },
-        {
-          "$ref": "#/definitions/PresentationContainer"
-        },
-        {
-          "$ref": "#/definitions/OrganizationContainer"
-        },
-        {
-          "$ref": "#/definitions/PersonContainer"
-        }
-      ]
-    },
     "Deployment": {
       "additionalProperties": false,
       "properties": {
@@ -212,59 +176,6 @@
           "$ref": "#/definitions/ServerDeploymentGroup"
         }
       ]
-    },
-    "EntityType": {
-      "enum": [
-        "Solution",
-        "KubernetesCluster",
-        "Provider",
-        "Server",
-        "Deployment",
-        "Presentation",
-        "Organization",
-        "Person"
-      ],
-      "type": "string"
-    },
-    "EntityTypeBinding": {
-      "additionalProperties": false,
-      "properties": {
-        "Deployment": {
-          "$ref": "#/definitions/Deployment"
-        },
-        "KubernetesCluster": {
-          "$ref": "#/definitions/KubernetesCluster"
-        },
-        "Organization": {
-          "$ref": "#/definitions/Organization"
-        },
-        "Person": {
-          "$ref": "#/definitions/Person"
-        },
-        "Presentation": {
-          "$ref": "#/definitions/Presentation"
-        },
-        "Provider": {
-          "$ref": "#/definitions/Provider"
-        },
-        "Server": {
-          "$ref": "#/definitions/Server"
-        },
-        "Solution": {
-          "$ref": "#/definitions/Solution"
-        }
-      },
-      "required": [
-        "Solution",
-        "KubernetesCluster",
-        "Provider",
-        "Server",
-        "Deployment",
-        "Presentation",
-        "Organization",
-        "Person"
-      ],
-      "type": "object"
     },
     "KubernetesCluster": {
       "additionalProperties": false,

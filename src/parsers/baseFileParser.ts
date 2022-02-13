@@ -18,15 +18,15 @@ export abstract class BaseFileParser implements Parser {
         this.jsonSchema = JSON.parse(
             fs.readFileSync(path.join(__dirname, '../../schema.json'), 'utf8'),
         );
-        this.ajv.addSchema(this.jsonSchema);
+        this.ajv.addSchema(this.jsonSchema, 'default');
     }
 
     protected abstract parseData(data: Buffer | string): any;
 
-    private validateSchema(data: any, entityName: string, fileName: string) {
-        const validate = this.ajv.getSchema(`#/definitions/${entityName}`);
+    private validateSchema(data: any, fileName: string, keyRef = 'default') {
+        const validate = this.ajv.getSchema(keyRef);
         if (!validate) {
-            throw new Error(`Can't find definition of ${entityName} in schema`);
+            throw new Error(`Can't find definition of ${keyRef} in schema`);
         }
         const valid = validate(data);
         if (!valid) {
@@ -60,13 +60,7 @@ export abstract class BaseFileParser implements Parser {
             const configData = data[i];
             const container = this.parseData(configData) as ConfigContainer;
 
-            this.validateSchema(
-                container,
-                'CommonConfigContainerAttributes',
-                names[i],
-            );
-
-            this.validateSchema(container.spec, container.kind, names[i]);
+            this.validateSchema(container, names[i]);
 
             (project as any)[`${unCapitalize(container.kind)}s`].set(
                 container.metadata.name,
