@@ -24,7 +24,7 @@ export class PlantUmlComponent extends PlantUmlObject {
         return `
         ${this.getContainerFigure()}("${this.id}", "${
             this.component.title || ''
-        }", "Component", "", "") {
+        }", "${this.component.description || 'Component'}", "", "") {
         `;
     }
 

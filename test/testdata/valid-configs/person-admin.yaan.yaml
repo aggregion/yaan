@@ -1,0 +1,9 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Person
+metadata:
+  name: admin
+
+spec:
+  title: "Administrator"
+  description: "System Administrator"
+

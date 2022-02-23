@@ -98,4 +98,9 @@ export interface Server {
      * Determines if it is not specific server but server's pool that can be scaled automatically.
      */
     pool?: ServerPool;
+
+    /**
+     * Ip addresses or hosts
+     */
+    hosts?: string[];
 }

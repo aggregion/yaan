@@ -1,0 +1,10 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Storage
+metadata:
+  name: k8s-master
+
+spec:
+  title: "S3 Storage"
+  description: "Amazon S3 Storage"
+  provider: amazon
+

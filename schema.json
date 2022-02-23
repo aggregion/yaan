@@ -14,6 +14,9 @@
       "$ref": "#/definitions/ServerContainer"
     },
     {
+      "$ref": "#/definitions/StorageContainer"
+    },
+    {
       "$ref": "#/definitions/DeploymentContainer"
     },
     {
@@ -559,6 +562,13 @@
           "$ref": "#/definitions/ServerHardware",
           "description": "Server hardware details"
         },
+        "hosts": {
+          "description": "Ip addresses or hosts",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "osName": {
           "description": "Operating system name like \"Ubuntu 20.04\"",
           "type": "string"
@@ -1010,6 +1020,87 @@
           "type": "string"
         }
       ]
+    },
+    "Storage": {
+      "additionalProperties": false,
+      "description": "Storage specification",
+      "properties": {
+        "description": {
+          "description": "Storage description",
+          "type": "string"
+        },
+        "hosts": {
+          "description": "IP addresses or hostnames",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "protocol": {
+          "$ref": "#/definitions/StorageProtocol",
+          "description": "Protocol"
+        },
+        "provider": {
+          "description": "Provider",
+          "type": "string"
+        },
+        "title": {
+          "description": "Human-readable storage name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "protocol"
+      ],
+      "type": "object"
+    },
+    "StorageContainer": {
+      "additionalProperties": false,
+      "description": "Describes specific storage",
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "Storage",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "organization": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "type": "object"
+        },
+        "spec": {
+          "$ref": "#/definitions/Storage"
+        }
+      },
+      "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+      ],
+      "type": "object"
+    },
+    "StorageProtocol": {
+      "enum": [
+        "other",
+        "s3",
+        "nfs",
+        "cifs"
+      ],
+      "type": "string"
     }
   }
 }

@@ -1,0 +1,9 @@
+apiVersion: yaan.aggregion.com/v1
+kind: Provider
+metadata:
+  name: amazon
+
+spec:
+  title: "AWS"
+  description: "Amazon Web Services"
+

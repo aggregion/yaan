@@ -16,6 +16,8 @@ export class Project implements ProjectContainer {
         new Map();
     public readonly servers: Map<string, EntityTypeBinding['Server']> =
         new Map();
+    public readonly storages: Map<string, EntityTypeBinding['Storage']> =
+        new Map();
     public readonly solutions: Map<string, EntityTypeBinding['Solution']> =
         new Map();
     public readonly organizations: Map<

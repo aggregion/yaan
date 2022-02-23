@@ -2,6 +2,7 @@ import { Solution } from './solution';
 import { KubernetesCluster } from './kubernetesCluster';
 import { Provider } from './provider';
 import { Server } from './server';
+import { Storage } from './storage';
 import { Deployment } from './deployment';
 import { Presentation } from './presentation';
 import { Organization } from './organization';
@@ -12,6 +13,7 @@ export interface EntityTypeBinding {
     KubernetesCluster: KubernetesCluster;
     Provider: Provider;
     Server: Server;
+    Storage: Storage;
     Deployment: Deployment;
     Presentation: Presentation;
     Organization: Organization;
@@ -64,6 +66,14 @@ export interface ServerContainer extends CommonConfigContainerAttributes {
 }
 
 /**
+ * Describes specific storage
+ */
+export interface StorageContainer extends CommonConfigContainerAttributes {
+    kind: 'Storage';
+    spec: Storage;
+}
+
+/**
  * Describes deployment
  */
 export interface DeploymentContainer extends CommonConfigContainerAttributes {
@@ -100,6 +110,7 @@ export type ConfigContainer =
     | KubernetesClusterContainer
     | ProviderContainer
     | ServerContainer
+    | StorageContainer
     | DeploymentContainer
     | PresentationContainer
     | OrganizationContainer
