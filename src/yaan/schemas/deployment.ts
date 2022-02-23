@@ -1,4 +1,4 @@
-export interface DeploymentExternalConnection {
+export interface DeploymentExternalConnectionToComponent {
     namespace?: string;
     deployment?: string;
     deploymentGroup?: string;
@@ -7,10 +7,18 @@ export interface DeploymentExternalConnection {
     description?: string;
 }
 
+export interface DeploymentExternalConnectionToStorage {
+    storage: string;
+    description?: string;
+}
+
 export interface DeploymentComponentDetailed {
     disabled?: boolean;
     name: string;
-    externalConnections?: DeploymentExternalConnection[];
+    externalConnections?: (
+        | DeploymentExternalConnectionToComponent
+        | DeploymentExternalConnectionToStorage
+    )[];
 }
 
 export interface DeploymentComponentFromGroup {
