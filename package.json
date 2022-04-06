@@ -1,7 +1,7 @@
 {
   "name": "@aggregion/yaan",
   "description": "Yet Another Architecture Notation",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "author": "Denis Bezrukov @anthrax63",
   "bin": {
     "yaan": "./bin/run"

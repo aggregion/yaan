@@ -77,7 +77,14 @@
         },
         "externalConnections": {
           "items": {
-            "$ref": "#/definitions/DeploymentExternalConnection"
+            "anyOf": [
+              {
+                "$ref": "#/definitions/DeploymentExternalConnectionToComponent"
+              },
+              {
+                "$ref": "#/definitions/DeploymentExternalConnectionToStorage"
+              }
+            ]
           },
           "type": "array"
         },
@@ -143,7 +150,7 @@
       ],
       "type": "object"
     },
-    "DeploymentExternalConnection": {
+    "DeploymentExternalConnectionToComponent": {
       "additionalProperties": false,
       "properties": {
         "component": {
@@ -167,6 +174,21 @@
       },
       "required": [
         "component"
+      ],
+      "type": "object"
+    },
+    "DeploymentExternalConnectionToStorage": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "storage": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "storage"
       ],
       "type": "object"
     },
@@ -194,6 +216,12 @@
             "$ref": "#/definitions/KubernetesClusterServer"
           },
           "type": "object"
+        },
+        "storageClasses": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "title": {
           "type": "string"

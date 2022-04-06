@@ -13,5 +13,5 @@ export interface KubernetesCluster {
     distribution?: string;
     version?: string;
     servers: Record<string, KubernetesClusterServer>;
-    storageClasses?: string[];
+    storageClasses?: (string | KubernetesClusterStorageClass)[];
 }
