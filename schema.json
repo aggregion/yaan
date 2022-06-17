@@ -219,7 +219,14 @@
         },
         "storageClasses": {
           "items": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/definitions/KubernetesClusterStorageClass"
+              }
+            ]
           },
           "type": "array"
         },
@@ -326,6 +333,21 @@
       },
       "required": [
         "type"
+      ],
+      "type": "object"
+    },
+    "KubernetesClusterStorageClass": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "storage": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
       ],
       "type": "object"
     },
