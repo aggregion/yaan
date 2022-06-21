@@ -11,6 +11,8 @@ export interface SolutionComponentUsageDetailed {
      */
     description: string;
 
+    doc?: string;
+
     /**
      * If required, related component must exist on all scopes where current component exists. Default: false.
      */

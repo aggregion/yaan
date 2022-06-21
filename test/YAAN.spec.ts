@@ -16,8 +16,8 @@ describe('YAAN', () => {
             'providers',
             'servers',
             'solutions',
-            'storages',
             'persons',
+            'organizations',
         ]
             .map((prop) => (project as any)[prop])
             .reduce((val, map) => val + map.size, 0);

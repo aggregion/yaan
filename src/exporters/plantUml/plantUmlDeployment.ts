@@ -12,9 +12,11 @@ export class PlantUmlDeployment extends PlantUmlObject {
 
     protected get header(): string {
         return `
-        Deployment_Node("${this.id}", "${this.deployment.title || ''}", "${
+        Deployment_Node("${this.id}", "${
+            this.deployment.title || ''
+        }", "Deployment", "${
             this.deployment.description || ''
-        }", "", $tags="deployment${!this.showDetails ? ',hidden' : ''}"){
+        }", "", $tags="deployment${!this.showDetails ? '+hidden' : ''}"){
         `;
     }
 
