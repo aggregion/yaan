@@ -9,6 +9,7 @@ export interface KubernetesClusterStorageClass {
 
 export interface KubernetesCluster {
     title: string;
+    doc?: string;
     description?: string;
     distribution?: string;
     version?: string;

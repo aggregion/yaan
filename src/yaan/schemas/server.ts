@@ -64,6 +64,13 @@ export interface Server {
      */
     description?: string;
 
+    doc?: string;
+
+    /**
+     * Organization that owns the server
+     */
+    owner?: string;
+
     /**
      * Provider that hosts the server
      */
