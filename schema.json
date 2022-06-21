@@ -14,9 +14,6 @@
       "$ref": "#/definitions/ServerContainer"
     },
     {
-      "$ref": "#/definitions/StorageContainer"
-    },
-    {
       "$ref": "#/definitions/DeploymentContainer"
     },
     {
@@ -40,6 +37,9 @@
           "type": "object"
         },
         "description": {
+          "type": "string"
+        },
+        "doc": {
           "type": "string"
         },
         "title": {
@@ -77,14 +77,7 @@
         },
         "externalConnections": {
           "items": {
-            "anyOf": [
-              {
-                "$ref": "#/definitions/DeploymentExternalConnectionToComponent"
-              },
-              {
-                "$ref": "#/definitions/DeploymentExternalConnectionToStorage"
-              }
-            ]
+            "$ref": "#/definitions/DeploymentExternalConnection"
           },
           "type": "array"
         },
@@ -150,6 +143,9 @@
       ],
       "type": "object"
     },
+    "DeploymentExternalConnection": {
+      "$ref": "#/definitions/DeploymentExternalConnectionToComponent"
+    },
     "DeploymentExternalConnectionToComponent": {
       "additionalProperties": false,
       "properties": {
@@ -177,21 +173,6 @@
       ],
       "type": "object"
     },
-    "DeploymentExternalConnectionToStorage": {
-      "additionalProperties": false,
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "storage": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "storage"
-      ],
-      "type": "object"
-    },
     "DeploymentGroup": {
       "anyOf": [
         {
@@ -209,6 +190,9 @@
           "type": "string"
         },
         "distribution": {
+          "type": "string"
+        },
+        "doc": {
           "type": "string"
         },
         "servers": {
@@ -357,6 +341,9 @@
         "description": {
           "type": "string"
         },
+        "doc": {
+          "type": "string"
+        },
         "title": {
           "type": "string"
         }
@@ -408,6 +395,9 @@
       "additionalProperties": false,
       "properties": {
         "description": {
+          "type": "string"
+        },
+        "doc": {
           "type": "string"
         },
         "organization": {
@@ -549,6 +539,9 @@
         "description": {
           "type": "string"
         },
+        "doc": {
+          "type": "string"
+        },
         "title": {
           "type": "string"
         }
@@ -604,6 +597,9 @@
           "description": "Server description",
           "type": "string"
         },
+        "doc": {
+          "type": "string"
+        },
         "firewall": {
           "$ref": "#/definitions/ServerFirewall",
           "description": "Determines firewall settings details. It may be not server's but gateway settings. The purpose of this description is to determine which ports / hosts are available for communication."
@@ -625,6 +621,10 @@
         },
         "osType": {
           "description": "Operating system type: linux, windows etc.",
+          "type": "string"
+        },
+        "owner": {
+          "description": "Organization that owns the server",
           "type": "string"
         },
         "pool": {
@@ -961,6 +961,9 @@
           "description": "Usage description like, for example \"sending email notifications\"",
           "type": "string"
         },
+        "doc": {
+          "type": "string"
+        },
         "name": {
           "type": "string"
         },
@@ -1070,87 +1073,6 @@
           "type": "string"
         }
       ]
-    },
-    "Storage": {
-      "additionalProperties": false,
-      "description": "Storage specification",
-      "properties": {
-        "description": {
-          "description": "Storage description",
-          "type": "string"
-        },
-        "hosts": {
-          "description": "IP addresses or hostnames",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "protocol": {
-          "$ref": "#/definitions/StorageProtocol",
-          "description": "Protocol"
-        },
-        "provider": {
-          "description": "Provider",
-          "type": "string"
-        },
-        "title": {
-          "description": "Human-readable storage name",
-          "type": "string"
-        }
-      },
-      "required": [
-        "title",
-        "protocol"
-      ],
-      "type": "object"
-    },
-    "StorageContainer": {
-      "additionalProperties": false,
-      "description": "Describes specific storage",
-      "properties": {
-        "apiVersion": {
-          "type": "string"
-        },
-        "kind": {
-          "const": "Storage",
-          "type": "string"
-        },
-        "metadata": {
-          "additionalProperties": false,
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "organization": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "name"
-          ],
-          "type": "object"
-        },
-        "spec": {
-          "$ref": "#/definitions/Storage"
-        }
-      },
-      "required": [
-        "apiVersion",
-        "kind",
-        "metadata",
-        "spec"
-      ],
-      "type": "object"
-    },
-    "StorageProtocol": {
-      "enum": [
-        "other",
-        "s3",
-        "nfs",
-        "cifs"
-      ],
-      "type": "string"
     }
   }
 }

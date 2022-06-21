@@ -1,7 +1,7 @@
 {
   "name": "@aggregion/yaan",
   "description": "Yet Another Architecture Notation",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "author": "Denis Bezrukov @anthrax63",
   "bin": {
     "yaan": "./bin/run"
@@ -51,7 +51,7 @@
   "license": "MIT",
   "main": "lib/index.js",
   "oclif": {
-    "commands": "./lib/commands",
+    "commands": "./src/commands",
     "bin": "yaan",
     "plugins": [
       "@oclif/plugin-help"
@@ -81,6 +81,7 @@
     "ajv": "8.8.2",
     "glob": "7.2.0",
     "object-path": "0.11.8",
+    "tinkergraph-js": "github:jbmusso/tinkergraph-js",
     "tslib": "1.14.1",
     "yaml": "1.10.2"
   }

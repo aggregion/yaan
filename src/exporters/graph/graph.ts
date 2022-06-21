@@ -15,20 +15,23 @@ import { Graph, GraphNode } from '../../yaan/graph';
 import { Server } from '../../yaan/schemas/server';
 import { KubernetesCluster } from '../../yaan/schemas/kubernetesCluster';
 import { Presentation } from '../../yaan/schemas/presentation';
+import { Organization } from '../../yaan/schemas/organization';
 
 type MapValueType<A> = A extends Map<any, infer V> ? V : never;
 
-enum RelationType {
+export enum RelationType {
     UsesInternal = 'uses-internal',
     UsesExternal = 'uses-external',
     DeployedOn = 'deployed-on',
     ClusteredOn = 'clustered-on',
+    OwnedBy = 'owned-by',
 }
 
 export interface GraphRelationPropsByType {
     'uses-internal': never;
     'uses-external': never;
     'deployed-on': never;
+    'owned-by': never;
     'clustered-on': {
         clusterNodeType: 'worker' | 'master';
     };
@@ -41,48 +44,56 @@ export interface GraphRelation<T extends RelationType> {
     props: GraphRelationPropsByType[T];
 }
 
-export interface GraphServer {
-    server: Server;
-    showHardwareDetails: boolean;
+interface NodeWithOwnership {
+    ownership: Set<string>;
 }
 
-export interface GraphKubernetesCluster {
+export interface GraphServer extends NodeWithOwnership {
+    server: Server;
+    showHardwareDetails: boolean;
+    ownership: Set<string>;
+}
+
+export interface GraphOrganization {
+    organization: Organization;
+}
+
+export interface GraphKubernetesCluster extends NodeWithOwnership {
     kubernetesCluster: KubernetesCluster;
     showDetails: boolean;
 }
 
-export interface GraphPresentation {
-    relations: GraphRelation<any>[];
-    servers: Record<string, GraphServer>;
-    kubernetesClusters: Record<string, GraphKubernetesCluster>;
-    deployments: Record<
+export interface GraphDeploymentGroup extends NodeWithOwnership {
+    deploymentGroup: DeploymentGroup;
+    componentGroups: Record<
         string,
         {
-            showDetails: boolean;
-            deployment: Deployment;
-            groups: Record<
-                string,
-                {
-                    deploymentGroup: DeploymentGroup;
-                    componentGroups: Record<
-                        string,
-                        {
-                            group: SolutionComponentGroup;
-                        }
-                    >;
-                    components: Record<
-                        string,
-                        {
-                            show: boolean;
-                            component: SolutionComponent;
-                            componentGroupName?: string;
-                            ports: Record<string, SolutionPort>;
-                        }
-                    >;
-                }
-            >;
+            group: SolutionComponentGroup;
         }
     >;
+    components: Record<
+        string,
+        {
+            show: boolean;
+            component: SolutionComponent;
+            componentGroupName?: string;
+            ports: Record<string, SolutionPort>;
+        }
+    >;
+}
+
+export interface GraphDeployment extends NodeWithOwnership {
+    showDetails: boolean;
+    deployment: Deployment;
+    groups: Record<string, GraphDeploymentGroup>;
+}
+
+export interface GraphPresentation {
+    relations: GraphRelation<any>[];
+    organizations: Record<string, GraphOrganization>;
+    servers: Record<string, GraphServer>;
+    kubernetesClusters: Record<string, GraphKubernetesCluster>;
+    deployments: Record<string, GraphDeployment>;
     presentation: Presentation;
 }
 
@@ -152,6 +163,13 @@ export const createGraph = (project: ProjectContainer) => {
 
     const graph = new Graph<GraphScheme>();
 
+    const affixOwnership = (
+        owner: GraphNode<any>,
+        ...nodes: GraphNode<NodeWithOwnership>[]
+    ) => {
+        nodes.forEach((n) => n.value.ownership.add(owner.key));
+    };
+
     for (const [presName, pres] of project.presentations) {
         const deferredResolveRelations: {
             src: GraphNode<any>;
@@ -166,6 +184,7 @@ export const createGraph = (project: ProjectContainer) => {
         }[] = [];
         const gunPres = graph.get('presentations').get(presName).put({
             relations: [],
+            organizations: {},
             servers: {},
             kubernetesClusters: {},
             deployments: {},
@@ -186,12 +205,14 @@ export const createGraph = (project: ProjectContainer) => {
                 deployment: dep,
                 showDetails: !hideComponents,
                 groups: {},
+                ownership: new Set(),
             });
             for (const [dgName, dg] of Object.entries(dep.deploymentGroups)) {
                 const gunDg = gunDep.get('groups').get(dgName).put({
                     deploymentGroup: dg,
                     componentGroups: {},
                     components: {},
+                    ownership: new Set(),
                 });
                 let dgContainer;
                 switch (dg.type) {
@@ -207,27 +228,58 @@ export const createGraph = (project: ProjectContainer) => {
                             gunCluster.put({
                                 kubernetesCluster: cluster,
                                 showDetails: !hideComponents,
+                                ownership: new Set(),
                             });
-                        }
-                        for (const [srvName, srv] of Object.entries(
-                            cluster.servers,
-                        )) {
-                            const server = getFromProject('servers', srvName);
-                            const gunServer = gunPres
-                                .get('servers')
-                                .get(srvName)
-                                .put({
-                                    server: server,
-                                    showHardwareDetails: !hideComponents,
+
+                            for (const [srvName, srv] of Object.entries(
+                                cluster.servers,
+                            )) {
+                                const server = getFromProject(
+                                    'servers',
+                                    srvName,
+                                );
+                                const gunServer = gunPres
+                                    .get('servers')
+                                    .get(srvName)
+                                    .put({
+                                        server: server,
+                                        showHardwareDetails: !hideComponents,
+                                        ownership: new Set<string>(),
+                                    });
+                                gunPres.get('relations').set({
+                                    src: gunCluster,
+                                    dest: gunServer,
+                                    type: RelationType.ClusteredOn,
+                                    props: {
+                                        clusterNodeType: srv.type,
+                                    },
                                 });
-                            gunPres.get('relations').set({
-                                src: gunCluster,
-                                dest: gunServer,
-                                type: RelationType.ClusteredOn,
-                                props: {
-                                    clusterNodeType: srv.type,
-                                },
-                            });
+                                if (server.owner) {
+                                    const org = getFromProject(
+                                        'organizations',
+                                        server.owner,
+                                    );
+                                    const gunOrg = gunPres
+                                        .get('organizations')
+                                        .get(server.owner)
+                                        .put({
+                                            organization: org,
+                                        });
+                                    gunPres.get('relations').set({
+                                        src: gunServer,
+                                        dest: gunOrg,
+                                        type: RelationType.OwnedBy,
+                                        props: {},
+                                    });
+                                    affixOwnership(
+                                        gunOrg,
+                                        gunServer,
+                                        gunCluster,
+                                        gunDg,
+                                        gunDep,
+                                    );
+                                }
+                            }
                         }
                         dgContainer = gunCluster;
                         break;
@@ -239,7 +291,27 @@ export const createGraph = (project: ProjectContainer) => {
                             .put({
                                 server: server,
                                 showHardwareDetails: !hideComponents,
+                                ownership: new Set(),
                             });
+                        if (server.owner) {
+                            const org = getFromProject(
+                                'organizations',
+                                server.owner,
+                            );
+                            const gunOrg = gunPres
+                                .get('organizations')
+                                .get(server.owner)
+                                .put({
+                                    organization: org,
+                                });
+                            gunPres.get('relations').set({
+                                src: gunServer,
+                                dest: gunOrg,
+                                type: RelationType.OwnedBy,
+                                props: {},
+                            });
+                            affixOwnership(gunOrg, gunServer, gunDg, gunDep);
+                        }
                         dgContainer = gunServer;
                         break;
                 }
@@ -507,7 +579,10 @@ export const createGraph = (project: ProjectContainer) => {
                                     gunPres.get('relations').set({
                                         src: defRel.src,
                                         dest: port,
-                                        type: RelationType.UsesExternal,
+                                        type:
+                                            defRel.srcDeployment === depName
+                                                ? RelationType.UsesInternal
+                                                : RelationType.UsesExternal,
                                         props: {
                                             description: defRel.description,
                                         },
@@ -518,7 +593,10 @@ export const createGraph = (project: ProjectContainer) => {
                             gunPres.get('relations').set({
                                 src: defRel.src,
                                 dest: comp,
-                                type: RelationType.UsesExternal,
+                                type:
+                                    defRel.srcDeployment === depName
+                                        ? RelationType.UsesInternal
+                                        : RelationType.UsesExternal,
                                 props: {
                                     description: defRel.description,
                                 },

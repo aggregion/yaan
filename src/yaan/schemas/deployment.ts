@@ -7,18 +7,13 @@ export interface DeploymentExternalConnectionToComponent {
     description?: string;
 }
 
-export interface DeploymentExternalConnectionToStorage {
-    storage: string;
-    description?: string;
-}
+export type DeploymentExternalConnection =
+    DeploymentExternalConnectionToComponent;
 
 export interface DeploymentComponentDetailed {
     disabled?: boolean;
     name: string;
-    externalConnections?: (
-        | DeploymentExternalConnectionToComponent
-        | DeploymentExternalConnectionToStorage
-    )[];
+    externalConnections?: DeploymentExternalConnection[];
 }
 
 export interface DeploymentComponentFromGroup {
@@ -58,6 +53,7 @@ export type DeploymentGroup =
 
 export interface Deployment {
     title: string;
+    doc?: string;
     description?: string;
     deploymentGroups: Record<string, DeploymentGroup>;
 }
