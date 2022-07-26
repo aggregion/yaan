@@ -904,6 +904,10 @@
           "description": "Determines ports, exposed by component. You can use simple record like \"api: 80\" or use detailed description.",
           "type": "object"
         },
+        "technology": {
+          "description": "Component technology",
+          "type": "string"
+        },
         "title": {
           "description": "Human readable name of component",
           "type": "string"
@@ -969,6 +973,9 @@
         },
         "port": {
           "description": "Port name of other component used to communication.",
+          "type": "string"
+        },
+        "protocol": {
           "type": "string"
         },
         "required": {
