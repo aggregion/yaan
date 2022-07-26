@@ -13,6 +13,8 @@ export interface SolutionComponentUsageDetailed {
 
     doc?: string;
 
+    protocol?: string;
+
     /**
      * If required, related component must exist on all scopes where current component exists. Default: false.
      */
@@ -55,6 +57,11 @@ export interface SolutionComponent {
      * Component description
      */
     description?: string;
+
+    /**
+     * Component technology
+     */
+    technology?: string;
 
     /**
      * Determines ports, exposed by component. You can use simple record like "api: 80" or use detailed description.
