@@ -16,6 +16,12 @@ export default class ExportMermaidSolution extends Command {
             description: 'name of solution to export',
             required: true,
         }),
+        detailed: flags.boolean({
+            char: 'd',
+            description: 'use components instead of groups',
+            required: false,
+            default: false,
+        }),
     };
 
     static args = [{ name: 'dir' }];
@@ -28,7 +34,11 @@ export default class ExportMermaidSolution extends Command {
                 const yaan = new YAAN();
                 const project = yaan.loadProjectFromDir(args.dir);
                 const mermaid = new MermaidExporter(project);
-                this.log(mermaid.exportSolution(flags.solution));
+                if (flags.detailed) {
+                    this.log(mermaid.exportSolutionDetailed(flags.solution));
+                } else {
+                    this.log(mermaid.exportSolution(flags.solution));
+                }
             } else {
                 this.error('Please specify project directory');
                 return -1;
