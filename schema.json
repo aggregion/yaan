@@ -985,7 +985,6 @@
       },
       "required": [
         "name",
-        "port",
         "description"
       ],
       "type": "object"
