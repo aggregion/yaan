@@ -496,23 +496,28 @@ export const createGraph = (project: ProjectContainer) => {
                                         );
                                     }
                                     const usingPort =
+                                        compUsage.port &&
                                         usingComponent.ports?.[compUsage.port];
                                     if (!usingPort) {
                                         throw new Error(
                                             `Can't find component port. Component: ${compUsage.name}, port: ${compUsage.port}`,
                                         );
                                     }
+                                    let dest: GraphNode<any> = gunPres
+                                        .get('deployments')
+                                        .get(depName)
+                                        .get('groups')
+                                        .get(dgName)
+                                        .get('components')
+                                        .get(compUsage.name);
+                                    if (compUsage.port) {
+                                        dest = dest
+                                            .get('ports')
+                                            .get(compUsage.port);
+                                    }
                                     gunPres.get('relations').set({
                                         src: gunComp,
-                                        dest: gunPres
-                                            .get('deployments')
-                                            .get(depName)
-                                            .get('groups')
-                                            .get(dgName)
-                                            .get('components')
-                                            .get(compUsage.name)
-                                            .get('ports')
-                                            .get(compUsage.port),
+                                        dest,
                                         type: RelationType.UsesInternal,
                                         props: {
                                             componentPort: {
