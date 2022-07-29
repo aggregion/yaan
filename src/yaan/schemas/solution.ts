@@ -4,7 +4,7 @@ export interface SolutionComponentUsageDetailed {
     /**
      * Port name of other component used to communication.
      */
-    port: string;
+    port?: string;
 
     /**
      * Usage description like, for example "sending email notifications"
