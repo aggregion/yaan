@@ -151,6 +151,10 @@ export class GraphNode<T> {
         return val as T;
     }
 
+    getPath(): string[] {
+        return this.path;
+    }
+
     defined(): boolean {
         return !!objectPath.get(this.baseObject, this.path);
     }
