@@ -30,4 +30,14 @@ export class PlantUmlRelation extends PlantUmlObject {
     protected get footer(): string {
         return '';
     }
+
+    public getParams() {
+        return {
+            fromKey: this.fromKey,
+            toKey: this.toKey,
+            type: this.type,
+            direction: this.direction,
+            title: this.title,
+        };
+    }
 }

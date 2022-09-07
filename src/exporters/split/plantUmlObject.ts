@@ -1,5 +1,6 @@
 export abstract class PlantUmlObject {
     public readonly children: PlantUmlObject[] = [];
+    public parents: string[] = [];
 
     constructor(public readonly id: string) {}
 

@@ -7,6 +7,7 @@ export enum GroupVisibility {
 }
 
 export class PlantUmlGroup extends PlantUmlObject {
+    private isC1Leaf = false;
     constructor(
         public readonly id: string,
         public readonly visibility: GroupVisibility = GroupVisibility.Hidden,
@@ -23,12 +24,16 @@ export class PlantUmlGroup extends PlantUmlObject {
         Deployment_Node("${this.id || 'unknown'}", "${
             (!hidden && this.title) || ' '
         }", $tags="${this.tags ? this.tags.join('+') + '+' : ''}${
-            hidden ? 'hiddenGroup' : 'visibleGroup'
+            hidden ? 'hiddenGroup' : this.isC1Leaf ? 'c1Leaf' : 'visibleGroup'
         }"){
         `;
     }
 
     protected get footer(): string {
         return '}';
+    }
+
+    public setC1Leaf(isLeaf: boolean) {
+        this.isC1Leaf = isLeaf;
     }
 }

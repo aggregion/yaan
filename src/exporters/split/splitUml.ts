@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import _ from 'lodash';
 import { PlantUmlObject } from './plantUmlObject';
 import { ProjectContainer } from '../../yaan/types';
-import { createGraph, RelationType } from '../graph/graph';
+import { createGraph, GraphRelation, RelationType } from '../graph/graph';
 import { PlantUmlServer } from './plantUmlServer';
 import { PlantUmlPresentation } from './plantUmlPresentation';
 import { PlantUmlKubernetesCluster } from './plantUmlKubernetesCluster';
@@ -28,8 +28,8 @@ interface SplitPlantUml {
     title: string;
     context: PlantUmlPresentation;
     componentGroups: {
-        data: PlantUmlPresentation;
-        componentsUml: PlantUmlPresentation[];
+        data: PlantUmlObject;
+        componentsUml: PlantUmlObject[]; // for components level if needed
     }[];
 }
 
@@ -46,15 +46,11 @@ export class SplitDocs {
         }
 
         const contextUml = new PlantUmlPresentation(
-            'context',
+            pres.key,
             pres.value.presentation,
         );
-        const compGroupsUml: {
-            data: PlantUmlPresentation;
-            componentsUml: PlantUmlPresentation[];
-        }[] = [];
+        const c1Leaves: PlantUmlObject[] = [];
         const layouts: PlantUmlLayout[] = [];
-
         const plantGroups: Record<string, Group> = {};
         const ensureGroup = (
             ownership: Set<string>,
@@ -88,22 +84,12 @@ export class SplitDocs {
                     ['software'],
                 );
                 infra.children.push(clusters, servers);
+                clusters.parents = [...infra.parents, infra.id];
+                servers.parents = [...infra.parents, infra.id];
                 plantGroup.children.push(deployments, infra);
+                deployments.parents = [...plantGroup.parents, plantGroup.id];
+                infra.parents = [...plantGroup.parents, plantGroup.id];
 
-                contextUml.children.push(
-                    new PlantUmlLayout(
-                        deployments.id,
-                        infra.id,
-                        LayoutDirection.Down,
-                    ),
-                );
-                contextUml.children.push(
-                    new PlantUmlLayout(
-                        clusters.id,
-                        servers.id,
-                        LayoutDirection.Down,
-                    ),
-                );
                 layouts.push(
                     new PlantUmlLayout(
                         deployments.id,
@@ -120,8 +106,10 @@ export class SplitDocs {
                 );
                 if (parent) {
                     parent.children.push(plantGroup);
+                    plantGroup.parents = [...parent.parents, parent.id];
                 } else {
                     contextUml.children.push(plantGroup);
+                    plantGroup.parents = [...contextUml.parents, contextUml.id];
                 }
                 plantGroups[groupId] = {
                     group: plantGroup,
@@ -138,6 +126,7 @@ export class SplitDocs {
                 org.get('organization').value,
             );
             contextUml.children.push(plantOrg);
+            plantOrg.parents = [...contextUml.parents, contextUml.id];
             ensureGroup(new Set([org.key]), plantOrg);
         });
         pres.get('deployments').each((deployment) => {
@@ -146,9 +135,12 @@ export class SplitDocs {
                 deployment.get('deployment').value,
                 deployment.get('showDetails').value,
             );
-            ensureGroup(deployment.value.ownership).deployments.children.push(
-                plantDep,
-            );
+            const ownershipGroup = ensureGroup(deployment.value.ownership);
+            ownershipGroup.deployments.children.push(plantDep);
+            plantDep.parents = [
+                ...ownershipGroup.deployments.parents,
+                ownershipGroup.deployments.id,
+            ];
             deployment.get('groups').each((group) => {
                 const plantGroup = new PlantUmlDeploymentGroup(
                     group.key,
@@ -156,27 +148,10 @@ export class SplitDocs {
                     deployment.get('showDetails').value,
                 );
                 plantDep.children.push(plantGroup);
+                plantGroup.parents = [...plantDep.parents, plantDep.id];
                 const componentGroups: Record<string, PlantUmlComponentGroup> =
                     {};
 
-                const presForCompGroups = new PlantUmlPresentation(
-                    `${group.getPath().join('-')}`,
-                    pres.value.presentation,
-                );
-                const emptyDep = new PlantUmlDeployment(
-                    `${presForCompGroups.id}-${plantDep.id}`,
-                    plantDep.deployment,
-                    plantDep.showDetails,
-                );
-                const compGroupForGroups = new PlantUmlDeploymentGroup(
-                    `${emptyDep.id}-${plantGroup.id}`,
-                    plantGroup.deploymentGroup,
-                    plantGroup.showDetails,
-                );
-                presForCompGroups.children.push(emptyDep);
-                emptyDep.children.push(compGroupForGroups);
-                const componentsUml: PlantUmlPresentation[] = [];
-                let groupAdded = false;
                 group.get('components').each((component) => {
                     if (!component.value.show) {
                         return;
@@ -198,55 +173,26 @@ export class SplitDocs {
                                 );
                             componentGroups[groupName] = plantComponentGroup;
                             plantGroup.children.push(plantComponentGroup);
-                            compGroupForGroups.children.push(
-                                plantComponentGroup,
-                            );
-                            if (
-                                plantComponentGroup instanceof
-                                PlantUmlComponentGroup
-                            ) {
-                                const subPres = new PlantUmlPresentation(
-                                    `${presForCompGroups.id}-${groupName}`,
-                                    pres.value.presentation,
-                                );
-                                const emptyDepForSub = new PlantUmlDeployment(
-                                    `${subPres.id}-${plantDep.id}`,
-                                    plantDep.deployment,
-                                    plantDep.showDetails,
-                                );
-                                const emptyGroupForGroupsForSub =
-                                    new PlantUmlDeploymentGroup(
-                                        `${emptyDepForSub.id}-${plantGroup.id}`,
-                                        plantGroup.deploymentGroup,
-                                        plantGroup.showDetails,
-                                    );
-                                subPres.children.push(emptyDepForSub);
-                                emptyDepForSub.children.push(
-                                    emptyGroupForGroupsForSub,
-                                );
-                                emptyGroupForGroupsForSub.children.push(
-                                    plantComponentGroup,
-                                );
-                                componentsUml.push(subPres);
-                            }
+                            plantComponentGroup.parents = [
+                                ...plantGroup.parents,
+                                plantGroup.id,
+                            ];
+                            c1Leaves.push(plantComponentGroup);
+                            plantComponentGroup.setC1Leaf(true);
                         }
-                        compGroupForGroups.children.push(plantComponent);
-                        if (!groupAdded) {
-                            compGroupsUml.push({
-                                data: presForCompGroups,
-                                componentsUml,
-                            });
-                            groupAdded = true;
-                        }
+                        componentGroups[groupName].children.push(
+                            plantComponent,
+                        );
+                        plantComponent.parents = [
+                            ...componentGroups[groupName].parents,
+                            componentGroups[groupName].id,
+                        ];
                     } else {
-                        compGroupForGroups.children.push(plantComponent);
-                        if (!groupAdded) {
-                            compGroupsUml.push({
-                                data: presForCompGroups,
-                                componentsUml: [],
-                            });
-                            groupAdded = true;
-                        }
+                        plantGroup.children.push(plantComponent);
+                        plantComponent.parents = [
+                            ...plantGroup.parents,
+                            plantGroup.id,
+                        ];
                     }
                     component.get('ports').each((port, portName) => {
                         const plantPort = new PlantUmlComponentPort(
@@ -255,15 +201,12 @@ export class SplitDocs {
                             portName,
                         );
                         plantComponent.children.push(plantPort);
+                        plantPort.parents = [
+                            ...plantComponent.parents,
+                            plantComponent.id,
+                        ];
                     });
                 });
-                presForCompGroups.children.push(
-                    ...layouts.filter(
-                        (layout) =>
-                            this._hasId(presForCompGroups, layout.fromKey) &&
-                            this._hasId(presForCompGroups, layout.toKey),
-                    ),
-                );
             });
         });
         pres.get('servers').each((server) => {
@@ -284,6 +227,46 @@ export class SplitDocs {
                 plantCluster,
             );
         });
+
+        const fullDoc = _.cloneDeep(contextUml);
+        const compGroupsUml: {
+            data: PlantUmlObject;
+            componentsUml: PlantUmlObject[];
+        }[] = [];
+        for (const leaf of c1Leaves) {
+            const pres = _.cloneDeep(contextUml as PlantUmlObject);
+            let root = pres;
+            for (let i = 1; i < leaf.parents.length; i++) {
+                const object = this._findById(contextUml, leaf.parents[i]);
+                if (object) {
+                    root.children.length = 0;
+                    root.children.push(_.cloneDeep(object));
+                    root = root.children[0];
+                }
+            }
+            root.children.length = 0;
+            root.children.push(_.cloneDeep(leaf));
+            compGroupsUml.push({ data: pres, componentsUml: [] });
+            leaf.children.length = 0;
+        }
+
+        for (const layout of layouts) {
+            if (
+                this._findById(contextUml, layout.fromKey) &&
+                this._findById(contextUml, layout.toKey)
+            ) {
+                contextUml.children.push(layout);
+            }
+            for (const group of compGroupsUml) {
+                if (
+                    this._findById(group.data, layout.fromKey) &&
+                    this._findById(group.data, layout.toKey)
+                ) {
+                    contextUml.children.push(layout);
+                }
+            }
+        }
+
         pres.get('relations').each((relation) => {
             const relationVal = relation.value;
             if (relationVal.type === RelationType.OwnedBy) {
@@ -299,48 +282,22 @@ export class SplitDocs {
                     direction = RelationDirection.Right;
                     break;
             }
-            if (
-                this._hasId(contextUml, relationVal.src.key) &&
-                this._hasId(contextUml, relationVal.dest.key)
-            ) {
-                const plantRel = new PlantUmlRelation(
-                    relationVal.src.key,
-                    relationVal.dest.key,
-                    relationVal.type,
+            this._addRelToObject(
+                fullDoc,
+                contextUml,
+                relationVal,
+                direction,
+                true,
+            );
+            for (const doc of compGroupsUml) {
+                // doc.data: presentation - puml group - deployment - deployment group
+                this._addRelToObject(
+                    fullDoc,
+                    doc.data.children[0].children[0].children[0].children[0],
+                    relationVal,
                     direction,
-                    relationVal.props?.description,
+                    false,
                 );
-                contextUml.children.push(plantRel);
-            }
-            for (const compGroupUml of compGroupsUml) {
-                if (
-                    this._hasId(compGroupUml.data, relationVal.src.key) &&
-                    this._hasId(compGroupUml.data, relationVal.dest.key)
-                ) {
-                    const plantRel = new PlantUmlRelation(
-                        relationVal.src.key,
-                        relationVal.dest.key,
-                        relationVal.type,
-                        direction,
-                        relationVal.props?.description,
-                    );
-                    compGroupUml.data.children.push(plantRel);
-                }
-                for (const component of compGroupUml.componentsUml) {
-                    if (
-                        this._hasId(component, relationVal.src.key) &&
-                        this._hasId(component, relationVal.dest.key)
-                    ) {
-                        const plantRel = new PlantUmlRelation(
-                            relationVal.src.key,
-                            relationVal.dest.key,
-                            relationVal.type,
-                            direction,
-                            relationVal.props?.description,
-                        );
-                        component.children.push(plantRel);
-                    }
-                }
             }
         });
 
@@ -351,39 +308,179 @@ export class SplitDocs {
         };
     }
 
-    private _hasId(object: PlantUmlObject, id: string): boolean {
-        if (JSON.stringify(object).indexOf(id) !== -1) {
-            return true;
+    private _findById(
+        object: PlantUmlObject,
+        id: string,
+    ): PlantUmlObject | null {
+        for (const child of object.children) {
+            if (child.id === id) {
+                return child;
+            }
+            const subChild = this._findById(child, id);
+            if (subChild) {
+                return subChild;
+            }
+        }
+        return null;
+    }
+
+    private _findParentInObject(
+        object: PlantUmlObject,
+        parents: string[],
+    ): string | null {
+        for (let i = parents.length - 1; i >= 0; i--) {
+            if (this._findById(object, parents[i])) {
+                return parents[i];
+            }
+        }
+        return null;
+    }
+
+    private _hasDuplicateRelation(
+        object: PlantUmlObject,
+        from: string,
+        to: string,
+        relType: string,
+        relDir: string,
+        descr?: string,
+    ) {
+        for (const rel of object.children) {
+            if (rel instanceof PlantUmlRelation) {
+                const { fromKey, toKey, type, direction, title } =
+                    rel.getParams();
+                if (
+                    from === fromKey &&
+                    to === toKey &&
+                    relType === type &&
+                    relDir === direction &&
+                    descr === title
+                ) {
+                    return true;
+                }
+            }
         }
         return false;
     }
 
+    private _addRelToObject(
+        fullDoc: PlantUmlObject,
+        currentDoc: PlantUmlObject,
+        relationVal: GraphRelation<any>,
+        direction: RelationDirection,
+        searchExternal: boolean,
+    ): void {
+        let src: string | null = relationVal.src.key;
+        let dest: string | null = relationVal.dest.key;
+        if (!this._findById(currentDoc, relationVal.src.key)) {
+            if (searchExternal) {
+                const object = this._findById(fullDoc, relationVal.src.key);
+                if (object && object.parents.length > 0) {
+                    src = this._findParentInObject(currentDoc, object.parents);
+                }
+            } else {
+                src = null;
+            }
+        }
+        if (!this._findById(currentDoc, relationVal.dest.key)) {
+            if (searchExternal) {
+                const object = this._findById(fullDoc, relationVal.dest.key);
+                if (object && object.parents.length > 0) {
+                    dest = this._findParentInObject(currentDoc, object.parents);
+                }
+            } else {
+                dest = null;
+            }
+        }
+
+        if (src && dest && src !== dest) {
+            if (
+                !this._hasDuplicateRelation(
+                    currentDoc,
+                    src,
+                    dest,
+                    relationVal.type,
+                    direction,
+                    relationVal.props?.description,
+                )
+            ) {
+                currentDoc.children.push(
+                    new PlantUmlRelation(
+                        src,
+                        dest,
+                        relationVal.type,
+                        direction,
+                        relationVal.props?.description,
+                    ),
+                );
+            }
+        }
+    }
+
     private _getGroupInfo(groupObject: PlantUmlObject): {
-        title: string;
+        id: string;
+        title?: string;
         description?: string;
     } {
-        // presentation - deployment - deploymentGroup
-        const deployment = groupObject.children.filter(
-            (child) => child instanceof PlantUmlDeployment,
+        // presentation - puml group - deployment - deploymentGroup
+        const pumlGroupTitle = (groupObject.children[0] as PlantUmlGroup).title;
+        const depTitle = (
+            groupObject.children[0].children[0] as PlantUmlDeployment
+        ).deployment.title;
+        const depGroup = groupObject.children[0].children[0]
+            .children[0] as PlantUmlDeploymentGroup;
+        return {
+            id: depGroup.children[0].id,
+            title: `${pumlGroupTitle}-${depTitle}-${
+                depGroup.deploymentGroup.title
+            }-${(depGroup.children[0] as PlantUmlComponentGroup).title}`,
+            description: `${
+                (depGroup.children[0] as PlantUmlComponentGroup).title
+            }: ${(
+                depGroup.children[0] as PlantUmlComponentGroup
+            ).group.components.join(', ')}`,
+        };
+    }
+
+    public async print(resultPath: string): Promise<void> {
+        const resPath = path.join(resultPath, this.doc.title);
+        await fs.emptyDir(resPath);
+        await fs.outputFile(
+            path.join(resPath, 'context.md'),
+            this.doc.context.children[0] instanceof PlantUmlPresentation
+                ? this.doc.context.children[0].presentation.title
+                : this.doc.title,
         );
-        const depGroup = deployment[0].children[0];
-        const defaultInfo = depGroup.id;
-        if (depGroup instanceof PlantUmlGroup) {
-            return {
-                title: depGroup.title || defaultInfo,
-            };
-        } else if (depGroup instanceof PlantUmlComponentGroup) {
-            return {
-                title: depGroup.title || defaultInfo,
-                description: depGroup.group.title,
-            };
-        } else if (depGroup instanceof PlantUmlDeploymentGroup) {
-            return {
-                title: depGroup.deploymentGroup.title || defaultInfo,
-                description: depGroup.deploymentGroup.solution,
-            };
+        await fs.outputFile(
+            path.join(resPath, 'context.puml'),
+            `${this.header}${this.doc.context.print()}${this.footer}`,
+        );
+        for (const container of this.doc.componentGroups) {
+            const { id, title, description } = this._getGroupInfo(
+                container.data,
+            );
+            const compGroupPath = path.join(resPath, title || id);
+            await fs.outputFile(
+                path.join(compGroupPath, 'container.md'),
+                description || title,
+            );
+            await fs.outputFile(
+                path.join(compGroupPath, 'container.puml'),
+                `${this.header}${container.data.print()}${this.footer}`,
+            );
+            for (const component of container.componentsUml) {
+                const { id, title, description } =
+                    this._getGroupInfo(component);
+                const compPath = path.join(compGroupPath, title || id);
+                await fs.outputFile(
+                    path.join(compPath, 'component.md'),
+                    description || title,
+                );
+                await fs.outputFile(
+                    path.join(compPath, 'component.puml'),
+                    `${this.header}${component.print()}${this.footer}`,
+                );
+            }
         }
-        return { title: defaultInfo };
     }
 
     protected get header(): string {
@@ -408,6 +505,7 @@ export class SplitDocs {
         AddElementTag("software", $bgColor = "#BAB995") 
         AddElementTag("infra", $bgColor = "#BAB995")                             
         AddElementTag("fallback", $bgColor="#c0c0c0")
+        AddElementTag("c1Leaf", $bgColor = "9ACD32", $fontColor="#3B3A2F")
         
         AddRelTag("fallback", $textColor="#c0c0c0", $lineColor="#438DD5")
         AddRelTag("uses-external", $textColor="#ff0000", $lineColor="#ff0000", $lineStyle=BoldLine())
@@ -432,44 +530,5 @@ export class SplitDocs {
         SHOW_LEGEND()
         @enduml
         `;
-    }
-
-    public async print(resultPath: string): Promise<void> {
-        const resPath = path.join(resultPath, this.doc.title);
-        await fs.emptyDir(resPath);
-        await fs.outputFile(
-            path.join(resPath, 'context.md'),
-            this.doc.context.children[0] instanceof PlantUmlPresentation
-                ? this.doc.context.children[0].presentation.title
-                : this.doc.title,
-        );
-        await fs.outputFile(
-            path.join(resPath, 'context.puml'),
-            `${this.header}${this.doc.context.print()}${this.footer}`,
-        );
-        for (const container of this.doc.componentGroups) {
-            const { title, description } = this._getGroupInfo(container.data);
-            const compGroupPath = path.join(resPath, container.data.id);
-            await fs.outputFile(
-                path.join(compGroupPath, 'container.md'),
-                description || title,
-            );
-            await fs.outputFile(
-                path.join(compGroupPath, 'container.puml'),
-                `${this.header}${container.data.print()}${this.footer}`,
-            );
-            for (const component of container.componentsUml) {
-                const { title, description } = this._getGroupInfo(component);
-                const compPath = path.join(compGroupPath, component.id);
-                await fs.outputFile(
-                    path.join(compPath, 'component.md'),
-                    description || title,
-                );
-                await fs.outputFile(
-                    path.join(compPath, 'component.puml'),
-                    `${this.header}${component.print()}${this.footer}`,
-                );
-            }
-        }
     }
 }
