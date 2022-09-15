@@ -50,6 +50,12 @@ export interface ServerPool {
     maxScale?: number;
 }
 
+export interface IPInterface {
+    description?: string;
+    address?: string;
+    netmask?: string;
+}
+
 /**
  * Server specification
  */
@@ -110,4 +116,6 @@ export interface Server {
      * Ip addresses or hosts
      */
     hosts?: string[];
+
+    interfaces?: Record<string, IPInterface>;
 }
