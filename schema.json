@@ -183,6 +183,21 @@
         }
       ]
     },
+    "IPInterface": {
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "netmask": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "KubernetesCluster": {
       "additionalProperties": false,
       "properties": {
@@ -614,6 +629,12 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "interfaces": {
+          "additionalProperties": {
+            "$ref": "#/definitions/IPInterface"
+          },
+          "type": "object"
         },
         "osName": {
           "description": "Operating system name like \"Ubuntu 20.04\"",
