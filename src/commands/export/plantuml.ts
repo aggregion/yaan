@@ -11,6 +11,10 @@ export default class Plantuml extends Command {
 
     static flags = {
         help: flags.help({ char: 'h' }),
+        kustomize: flags.boolean({
+            char: 'k',
+            description: 'Target directory is Kustomize',
+        }),
         // flag with no value (-f, --force)
         presentation: flags.string({
             char: 'p',
@@ -27,7 +31,11 @@ export default class Plantuml extends Command {
 
             if (args.dir) {
                 const yaan = new YAAN();
-                const project = yaan.loadProjectFromDir(args.dir);
+                const project = yaan.loadProjectFromDir(
+                    args.dir,
+                    undefined,
+                    flags.kustomize,
+                );
                 const plantUml = new PlantUml(project, flags.presentation);
                 this.log(plantUml.print());
             } else {
