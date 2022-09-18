@@ -1,4 +1,5 @@
 import { PlantUmlObject } from './plantUmlObject';
+import { escapeStr } from './helpers';
 
 export enum RelationDirection {
     None = '',
@@ -23,7 +24,7 @@ export class PlantUmlRelation extends PlantUmlObject {
         return `
         Rel${this.direction ? '_' + this.direction : ''}("${this.fromKey}", "${
             this.toKey
-        }", "${this.title || ' '}", $tags="${this.type}")
+        }", "${escapeStr(this.title || ' ')}", $tags="${this.type}")
         `;
     }
 

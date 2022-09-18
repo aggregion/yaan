@@ -1,4 +1,5 @@
 import { PlantUmlObject } from './plantUmlObject';
+import { escapeStr } from './helpers';
 
 export enum GroupVisibility {
     Hidden,
@@ -24,7 +25,7 @@ export class PlantUmlGroup extends PlantUmlObject {
 
         return `
         Deployment_Node("${this.id || 'unknown'}", "${
-            (!hidden && this.title) || ' '
+            (!hidden && escapeStr(this.title || '')) || ' '
         }", $tags="${this.tags ? this.tags.join('+') + '+' : ''}${
             hidden ? 'hiddenGroup' : 'visibleGroup'
         }"){

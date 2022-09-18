@@ -1,5 +1,6 @@
 import { PlantUmlObject } from './plantUmlObject';
 import { Deployment } from '../../yaan/schemas/deployment';
+import { escapeStr } from './helpers';
 
 export class PlantUmlDeployment extends PlantUmlObject {
     constructor(
@@ -12,11 +13,11 @@ export class PlantUmlDeployment extends PlantUmlObject {
 
     protected get header(): string {
         return `
-        Deployment_Node("${this.id}", "${
-            this.deployment.title || ''
-        }", "Deployment", "${
-            this.deployment.description || ''
-        }", "", $tags="deployment${!this.showDetails ? '+hidden' : ''}"){
+        Deployment_Node("${this.id}", "${escapeStr(
+            this.deployment.title || '',
+        )}", "Deployment", "${escapeStr(
+            this.deployment.description || '',
+        )}", "", $tags="deployment${!this.showDetails ? '+hidden' : ''}"){
         `;
     }
 

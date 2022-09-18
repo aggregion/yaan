@@ -1,5 +1,6 @@
 import { PlantUmlObject } from './plantUmlObject';
 import { Presentation } from '../../yaan/schemas/presentation';
+import { escapeStr } from './helpers';
 
 export class PlantUmlPresentation extends PlantUmlObject {
     constructor(
@@ -10,7 +11,9 @@ export class PlantUmlPresentation extends PlantUmlObject {
     }
 
     protected get header(): string {
-        return `Deployment_Node("${this.id}", "${this.presentation.title}", ""){`;
+        return `Deployment_Node("${this.id}", "${escapeStr(
+            this.presentation.title,
+        )}", ""){`;
     }
 
     protected get footer(): string {

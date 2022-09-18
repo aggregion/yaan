@@ -1,5 +1,6 @@
 import { PlantUmlObject } from './plantUmlObject';
 import { Organization } from '../../yaan/schemas/organization';
+import { escapeStr } from './helpers';
 
 export class PlantUmlOrganization extends PlantUmlObject {
     constructor(
@@ -13,7 +14,9 @@ export class PlantUmlOrganization extends PlantUmlObject {
         const props = [];
         if (this.organization.description) {
             props.push(
-                `AddProperty("Description", "${this.organization.description}")`,
+                `AddProperty("Description", "${escapeStr(
+                    this.organization.description,
+                )}")`,
             );
         }
         return props.join('\n');
@@ -22,9 +25,9 @@ export class PlantUmlOrganization extends PlantUmlObject {
     protected get header(): string {
         return `
         ${this.renderProps()}
-        Deployment_Node("${this.id}", "${
-            this.organization.title
-        }", "Organization", "", $tags="organization"){
+        Deployment_Node("${this.id}", "${escapeStr(
+            this.organization.title,
+        )}", "Organization", "", $tags="organization"){
         `;
     }
 

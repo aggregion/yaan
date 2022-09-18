@@ -1,5 +1,6 @@
 import { PlantUmlObject } from './plantUmlObject';
 import { KubernetesCluster } from '../../yaan/schemas/kubernetesCluster';
+import { escapeStr } from './helpers';
 
 export class PlantUmlKubernetesCluster extends PlantUmlObject {
     constructor(
@@ -17,11 +18,15 @@ export class PlantUmlKubernetesCluster extends PlantUmlObject {
         const props = [];
         if (this.cluster.distribution) {
             props.push(
-                `AddProperty("Distribution", "${this.cluster.distribution}")`,
+                `AddProperty("Distribution", "${escapeStr(
+                    this.cluster.distribution,
+                )}")`,
             );
         }
         if (this.cluster.version) {
-            props.push(`AddProperty("Version", "${this.cluster.version}")`);
+            props.push(
+                `AddProperty("Version", "${escapeStr(this.cluster.version)}")`,
+            );
         }
         return props.join('\n');
     }
@@ -30,7 +35,7 @@ export class PlantUmlKubernetesCluster extends PlantUmlObject {
         return `
         ${this.renderProps()}
         Deployment_Node("${this.id}", "${
-            this.showDetails ? this.cluster.title : '***'
+            this.showDetails ? escapeStr(this.cluster.title) : '***'
         }", "Kubernetes Cluster", "", $sprite=kubernetes, $tags="kubernetesCluster${
             !this.showDetails ? ',hidden' : ''
         }"){
