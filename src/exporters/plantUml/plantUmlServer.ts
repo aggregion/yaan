@@ -6,6 +6,7 @@ import {
     ServerFirewallPortsRule,
     ServerFirewallRule,
 } from '../../yaan/schemas/server';
+import { escapeStr } from './helpers';
 
 export class PlantUmlServer extends PlantUmlObject {
     constructor(
@@ -86,7 +87,7 @@ export class PlantUmlServer extends PlantUmlObject {
                         hostsStr = '*';
                     } else {
                         const detailedRule = rule as ServerFirewallRule;
-                        descStr = detailedRule.description || '';
+                        descStr = escapeStr(detailedRule.description || '');
                         const ports = [];
                         if (detailedRule.ports) {
                             for (const portVal of Object.values(
@@ -174,7 +175,7 @@ export class PlantUmlServer extends PlantUmlObject {
         return `
         ${this.renderProps()}
         Deployment_Node("${this.id}", "${
-            this.showDetails ? this.server.title : '***'
+            this.showDetails ? escapeStr(this.server.title) : '***'
         }", "Server", "${
             this.server.description || ''
         }", $sprite=server, $tags="server${

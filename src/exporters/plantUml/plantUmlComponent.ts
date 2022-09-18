@@ -1,5 +1,6 @@
 import { PlantUmlObject } from './plantUmlObject';
 import { SolutionComponent } from '../../yaan/schemas/solution';
+import { escapeStr } from './helpers';
 
 export class PlantUmlComponent extends PlantUmlObject {
     constructor(
@@ -22,9 +23,11 @@ export class PlantUmlComponent extends PlantUmlObject {
 
     protected get header(): string {
         return `
-        ${this.getContainerFigure()}("${this.id}", "${
-            this.component.title || ''
-        }", "${this.component.description || 'Component'}", "", "") {
+        ${this.getContainerFigure()}("${this.id}", "${escapeStr(
+            this.component.title || '',
+        )}", "${escapeStr(
+            this.component.description || 'Component',
+        )}", "", "") {
         `;
     }
 
