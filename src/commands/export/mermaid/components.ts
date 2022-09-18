@@ -12,6 +12,10 @@ export default class ExportMermaidComponents extends Command {
 
     static flags = {
         help: flags.help({ char: 'h' }),
+        kustomize: flags.boolean({
+            char: 'k',
+            description: 'Target directory is Kustomize',
+        }),
         solution: flags.string({
             char: 's',
             description: 'solution containing component to export',
@@ -27,7 +31,11 @@ export default class ExportMermaidComponents extends Command {
 
             if (args.dir) {
                 const yaan = new YAAN();
-                const project = yaan.loadProjectFromDir(args.dir);
+                const project = yaan.loadProjectFromDir(
+                    args.dir,
+                    undefined,
+                    flags.kustomize,
+                );
                 const mermaid = new MermaidExporter(project);
                 const sol = project.solutions.get(flags.solution);
                 if (!sol) {
