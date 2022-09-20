@@ -308,17 +308,45 @@ export class MermaidExporter {
         }
         const usedBy = [];
         const usingOf = [];
+
+        const getPortNumber = (compName: string, portName: string) => {
+            let portNumber: string | undefined = undefined;
+            const comp = sol.components[compName];
+            if (!comp) {
+                throw new Error(
+                    `Can't find component "${compName}" used by "${compName}"`,
+                );
+            }
+            if (!comp.ports || !comp.ports[portName]) {
+                throw new Error(
+                    `Can't find port "${portName}" of component "${compName}"`,
+                );
+            }
+            const port = comp.ports[portName];
+            if (typeof port === 'object') {
+                portNumber = port.number.toString();
+            } else {
+                portNumber = port.toString();
+            }
+            return portNumber;
+        };
+
         if (comp.uses) {
             for (const usage of comp.uses) {
                 if (typeof usage === 'string') {
                     usingOf.push(new MermaidRel(compName, usage));
                 } else {
+                    const portNumber = usage.port
+                        ? getPortNumber(usage.name, usage.port)
+                        : '';
                     usingOf.push(
                         new MermaidRel(
                             compName,
                             usage.name,
                             usage.description,
                             usage.protocol,
+                            '',
+                            portNumber,
                         ),
                     );
                 }
@@ -333,12 +361,17 @@ export class MermaidExporter {
                         }
                     } else {
                         if (usage.name === compName) {
+                            const portNumber = usage.port
+                                ? getPortNumber(compName, usage.port)
+                                : '';
                             usedBy.push(
                                 new MermaidRel(
                                     uCompName,
                                     compName,
                                     usage.description,
                                     usage.protocol,
+                                    '',
+                                    portNumber,
                                 ),
                             );
                         }
