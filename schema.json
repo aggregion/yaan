@@ -183,6 +183,19 @@
         }
       ]
     },
+    "EntityType": {
+      "enum": [
+        "Solution",
+        "KubernetesCluster",
+        "Provider",
+        "Server",
+        "Deployment",
+        "Presentation",
+        "Organization",
+        "Person"
+      ],
+      "type": "string"
+    },
     "IPInterface": {
       "additionalProperties": false,
       "properties": {
@@ -474,6 +487,12 @@
           },
           "type": "array"
         },
+        "include": {
+          "items": {
+            "$ref": "#/definitions/PresentationInclude"
+          },
+          "type": "array"
+        },
         "title": {
           "type": "string"
         }
@@ -545,6 +564,22 @@
       "required": [
         "name",
         "showOnlyExternallyConnected"
+      ],
+      "type": "object"
+    },
+    "PresentationInclude": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/EntityType"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
       ],
       "type": "object"
     },
