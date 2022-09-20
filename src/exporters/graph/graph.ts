@@ -190,9 +190,35 @@ export const createGraph = (project: ProjectContainer) => {
             deployments: {},
             presentation: pres,
         });
+
+        const addServer = (srvName: string, hideComponents: boolean) => {
+            const server = getFromProject('servers', srvName);
+            const gunServer = gunPres.get('servers').get(srvName).put({
+                server: server,
+                showHardwareDetails: !hideComponents,
+                ownership: new Set<string>(),
+            });
+            if (server.owner) {
+                const org = getFromProject('organizations', server.owner);
+                const gunOrg = gunPres
+                    .get('organizations')
+                    .get(server.owner)
+                    .put({
+                        organization: org,
+                    });
+                gunPres.get('relations').set({
+                    src: gunServer,
+                    dest: gunOrg,
+                    type: RelationType.OwnedBy,
+                    props: {},
+                });
+            }
+            return gunServer;
+        };
+
         for (const presDepValue of pres.deployments) {
             let depName;
-            let hideComponents;
+            let hideComponents = false;
             if (typeof presDepValue === 'string') {
                 depName = presDepValue;
                 hideComponents = false;
@@ -200,6 +226,7 @@ export const createGraph = (project: ProjectContainer) => {
                 depName = presDepValue.name;
                 hideComponents = presDepValue.showOnlyExternallyConnected;
             }
+
             const dep = getFromProject('deployments', depName);
             const gunDep = gunPres.get('deployments').get(depName).put({
                 deployment: dep,
@@ -234,18 +261,10 @@ export const createGraph = (project: ProjectContainer) => {
                             for (const [srvName, srv] of Object.entries(
                                 cluster.servers,
                             )) {
-                                const server = getFromProject(
-                                    'servers',
+                                const gunServer = addServer(
                                     srvName,
+                                    hideComponents,
                                 );
-                                const gunServer = gunPres
-                                    .get('servers')
-                                    .get(srvName)
-                                    .put({
-                                        server: server,
-                                        showHardwareDetails: !hideComponents,
-                                        ownership: new Set<string>(),
-                                    });
                                 gunPres.get('relations').set({
                                     src: gunCluster,
                                     dest: gunServer,
@@ -254,14 +273,14 @@ export const createGraph = (project: ProjectContainer) => {
                                         clusterNodeType: srv.type,
                                     },
                                 });
-                                if (server.owner) {
+                                if (gunServer.value.server.owner) {
                                     const org = getFromProject(
                                         'organizations',
-                                        server.owner,
+                                        gunServer.value.server.owner,
                                     );
                                     const gunOrg = gunPres
                                         .get('organizations')
-                                        .get(server.owner)
+                                        .get(gunServer.value.server.owner)
                                         .put({
                                             organization: org,
                                         });
@@ -284,23 +303,15 @@ export const createGraph = (project: ProjectContainer) => {
                         dgContainer = gunCluster;
                         break;
                     case 'Server':
-                        const server = getFromProject('servers', dg.server);
-                        const gunServer = gunPres
-                            .get('servers')
-                            .get(dg.server)
-                            .put({
-                                server: server,
-                                showHardwareDetails: !hideComponents,
-                                ownership: new Set(),
-                            });
-                        if (server.owner) {
+                        const gunServer = addServer(dg.server, hideComponents);
+                        if (gunServer.value.server.owner) {
                             const org = getFromProject(
                                 'organizations',
-                                server.owner,
+                                gunServer.value.server.owner,
                             );
                             const gunOrg = gunPres
                                 .get('organizations')
-                                .get(server.owner)
+                                .get(gunServer.value.server.owner)
                                 .put({
                                     organization: org,
                                 });
@@ -555,6 +566,35 @@ export const createGraph = (project: ProjectContainer) => {
             }
         }
 
+        // Add includes
+        if (pres.include) {
+            for (const include of pres.include) {
+                switch (include.kind) {
+                    case 'Server':
+                        const gunServer = addServer(include.name, false);
+                        if (gunServer.value.server.owner) {
+                            const org = getFromProject(
+                                'organizations',
+                                gunServer.value.server.owner,
+                            );
+                            const gunOrg = gunPres
+                                .get('organizations')
+                                .get(gunServer.value.server.owner)
+                                .put({
+                                    organization: org,
+                                });
+                            gunPres.get('relations').set({
+                                src: gunServer,
+                                dest: gunOrg,
+                                type: RelationType.OwnedBy,
+                                props: {},
+                            });
+                            affixOwnership(gunOrg, gunServer);
+                        }
+                        break;
+                }
+            }
+        }
         // Resolve relations
         for (const defRel of deferredResolveRelations) {
             gunPres.get('deployments').each((dep, depName) => {
