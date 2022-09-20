@@ -7,14 +7,23 @@ export class MermaidRel extends MermaidObject {
         public readonly title?: string,
         public readonly technology?: string,
         public readonly description?: string,
+        public readonly port?: string,
     ) {
         super();
     }
 
     public print(): string {
+        const proto =
+            this.technology && this.port
+                ? `${this.technology} (${this.port})`
+                : this.technology
+                ? `${this.technology}`
+                : this.port
+                ? `${this.port}`
+                : '';
         return `Rel${this.relationType}(${this.from}, ${this.to}, "${
             this.title || ''
-        }", "${this.technology || ''}", "${this.description || ''}")`;
+        }", "${proto}", "${this.description || ''}")`;
     }
 
     protected get relationType() {

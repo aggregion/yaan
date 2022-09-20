@@ -2,6 +2,7 @@ import { Command, flags } from '@oclif/command';
 import { YAAN } from '../../../yaan/yaan';
 import { MermaidExporter } from '../../../exporters/mermaid/mermaid';
 import * as fs from 'fs';
+import * as path from 'path';
 
 export default class ExportMermaidComponents extends Command {
     static description = 'Export to MermaidJS diagram';
@@ -20,6 +21,12 @@ export default class ExportMermaidComponents extends Command {
             char: 's',
             description: 'solution containing component to export',
             required: true,
+        }),
+        outDir: flags.string({
+            char: 'O',
+            description:
+                'output directory (if not specified, current workdir will be used)',
+            required: false,
         }),
     };
 
@@ -47,7 +54,11 @@ export default class ExportMermaidComponents extends Command {
                         compName,
                         { useBoundary: false, generateLinks: true },
                     );
-                    fs.writeFileSync(`${compName}.mermaid`, mmd, 'utf-8');
+                    const fileName = path.join(
+                        flags.outDir || process.cwd(),
+                        `${compName}.mermaid`,
+                    );
+                    fs.writeFileSync(fileName, mmd, 'utf-8');
                 }
             } else {
                 this.error('Please specify project directory');
