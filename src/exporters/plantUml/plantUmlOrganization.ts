@@ -25,7 +25,7 @@ export class PlantUmlOrganization extends PlantUmlObject {
     protected get header(): string {
         return `
         ${this.renderProps()}
-        Deployment_Node("${this.id}", "${escapeStr(
+        Boundary("${this.id}", "${escapeStr(
             this.organization.title,
         )}", "Organization", "", $tags="organization"){
         `;
