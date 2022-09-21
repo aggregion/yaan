@@ -1,5 +1,4 @@
 import { PlantUmlObject } from './plantUmlObject';
-import { escapeStr } from './helpers';
 
 export enum RelationDirection {
     None = '',
