@@ -194,10 +194,10 @@ export class PlantUml extends PlantUmlObject {
             switch (relationVal.type) {
                 case RelationType.DeployedOn:
                 case RelationType.ClusteredOn:
-                    direction = RelationDirection.Down;
+                    direction = RelationDirection.Neighbor;
                     break;
                 case RelationType.UsesExternal:
-                    direction = RelationDirection.Right;
+                    direction = RelationDirection.Down;
                     break;
             }
             const plantRel = new PlantUmlRelation(
@@ -226,25 +226,44 @@ export class PlantUml extends PlantUmlObject {
         !include FONTAWESOME1/hdd_o.puml
         !include FONTAWESOME1/lock.puml
         !include DEVICONS/kubernetes.puml
-                     
+        skinparam linetype ortho
+        skinparam dpi 96
+        skinparam padding 32
+        skinparam rectangle<<organization>> {
+          FontSize 64
+        }
+        
+        skinparam rectangle<<visibleGroup>> {
+          FontSize 8
+        }
+        
+        skinparam rectangle<<container>> {
+          FontSize 16
+        }
+        
+        skinparam arrow {
+          FontSize 8
+          FontColor grey
+        }
+        
+        skinparam maxMessageSize 40
+
+
+
+        
+        HIDE_STEREOTYPE()
+                 
         AddElementTag("hiddenGroup", $bgColor = "transparent", $borderColor="transparent")  
         AddElementTag("visibleGroup", $bgColor = "transparent", $fontColor="#3B3A2F")              
-        AddElementTag("organization", $bgColor = "#FAF8C9", $shadowing="true", $shape=RoundedBoxShape())    
-        AddElementTag("software", $bgColor = "#BAB995") 
-        AddElementTag("infra", $bgColor = "#BAB995")                             
-        AddElementTag("fallback", $bgColor="#c0c0c0")
-        
-        AddRelTag("fallback", $textColor="#c0c0c0", $lineColor="#438DD5")
-        AddRelTag("uses-external", $textColor="#ff0000", $lineColor="#ff0000", $lineStyle=BoldLine())
-        AddRelTag("uses-internal", $textColor="#3B3A2F", $lineColor="#3B3A2F", $lineStyle=DashedLine())
-        AddRelTag("deployed-on", $textColor="#3B3A2F", $lineColor="#3B3A2F", $lineStyle=DashedLine())
-        AddRelTag("clustered-on", $textColor="#3B3A2F", $lineColor="#3B3A2F", $lineStyle=DashedLine())
+        AddElementTag("organization", $shape=RoundedBoxShape(), $bgColor="#f5f5f5")   
+        AddElementTag("server", $shape=RoundedBoxShape(), $bgColor="#ebffee")  
 
-        AddElementTag("deploymentGroup", $bgColor="#BAB995")
-        AddElementTag("deployment", $shadowing = true, $bgColor = "transparent")
-        AddElementTag("server", $shadowing = true, $bgColor="#E0DFB4")
-        AddElementTag("kubernetesCluster", $shadowing = true)
-        AddElementTag("hidden", $shadowing = false, $shape = EightSidedShape(), $bgColor="#444444")
+
+        AddRelTag("fallback", $textColor="#c0c0c0", $lineColor="#438DD5")
+        AddRelTag("uses-external", $textColor="#ff0000", $lineColor="#ff0000")
+        AddRelTag("uses-internal", $textColor="#3B3A2F", $lineColor="#3B3A2F")
+        AddRelTag("deployed-on", $textColor="#3B3A2F", $lineColor="#3B3A2F")
+        AddRelTag("clustered-on", $textColor="#3B3A2F", $lineColor="#3B3A2F")
 
         
         WithoutPropertyHeader()
@@ -254,7 +273,6 @@ export class PlantUml extends PlantUmlObject {
 
     protected get footer(): string {
         return `
-        SHOW_LEGEND()
         @enduml
         `;
     }

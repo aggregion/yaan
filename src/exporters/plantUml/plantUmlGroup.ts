@@ -24,7 +24,7 @@ export class PlantUmlGroup extends PlantUmlObject {
                 this.children.length === 0);
 
         return `
-        Deployment_Node("${this.id || 'unknown'}", "${
+        Boundary("${this.id || 'unknown'}", "${
             (!hidden && escapeStr(this.title || '')) || ' '
         }", $tags="${this.tags ? this.tags.join('+') + '+' : ''}${
             hidden ? 'hiddenGroup' : 'visibleGroup'

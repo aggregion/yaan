@@ -179,7 +179,7 @@ export class PlantUmlServer extends PlantUmlObject {
         }", "Server", "${
             this.server.description || ''
         }", $sprite=server, $tags="server${
-            !this.showDetails ? ',hidden' : ''
+            !this.showDetails ? '+hidden' : ''
         }"){
           ${this.renderCpus()}
           ${this.renderDisks()}
