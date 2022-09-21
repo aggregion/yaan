@@ -7,6 +7,7 @@ export enum RelationDirection {
     Down = 'D',
     Right = 'R',
     Left = 'L',
+    Neighbor = 'Neighbor',
 }
 
 export class PlantUmlRelation extends PlantUmlObject {
@@ -24,7 +25,7 @@ export class PlantUmlRelation extends PlantUmlObject {
         return `
         Rel${this.direction ? '_' + this.direction : ''}("${this.fromKey}", "${
             this.toKey
-        }", "${escapeStr(this.title || ' ')}", $tags="${this.type}")
+        }", "${/*escapeStr(this.title || ' ')*/ ' '}", $tags="${this.type}")
         `;
     }
 
