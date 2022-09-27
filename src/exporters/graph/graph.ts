@@ -506,14 +506,6 @@ export const createGraph = (project: ProjectContainer) => {
                                             `Using component is not defined: ${compUsage.name}`,
                                         );
                                     }
-                                    const usingPort =
-                                        compUsage.port &&
-                                        usingComponent.ports?.[compUsage.port];
-                                    if (!usingPort) {
-                                        throw new Error(
-                                            `Can't find component port. Component: ${compUsage.name}, port: ${compUsage.port}`,
-                                        );
-                                    }
                                     let dest: GraphNode<any> = gunPres
                                         .get('deployments')
                                         .get(depName)
@@ -522,6 +514,16 @@ export const createGraph = (project: ProjectContainer) => {
                                         .get('components')
                                         .get(compUsage.name);
                                     if (compUsage.port) {
+                                        const usingPort =
+                                            compUsage.port &&
+                                            usingComponent.ports?.[
+                                                compUsage.port
+                                            ];
+                                        if (!usingPort) {
+                                            throw new Error(
+                                                `Can't find component port. Component: ${compUsage.name}, port: ${compUsage.port}`,
+                                            );
+                                        }
                                         dest = dest
                                             .get('ports')
                                             .get(compUsage.port);
