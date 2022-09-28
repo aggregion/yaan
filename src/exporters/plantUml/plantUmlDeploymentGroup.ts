@@ -13,11 +13,14 @@ export class PlantUmlDeploymentGroup extends PlantUmlObject {
 
     protected get header(): string {
         return `
-        Deployment_Node("${this.id}", "${escapeStr(
+        Boundary("${this.id}", "${escapeStr(
             this.deploymentGroup.title || ' ',
-        )}", "Deployment group", "", $tags="deploymentGroup${
-            !this.showDetails ? ',hidden' : ''
-        }"){
+        )}", "${
+            this.deploymentGroup.type === 'KubernetesCluster' &&
+            this.deploymentGroup.clusterNamespace
+                ? `Namespace: ${this.deploymentGroup.clusterNamespace}`
+                : ''
+        }", $tags="deploymentGroup${!this.showDetails ? ',hidden' : ''}"){
         `;
     }
 
