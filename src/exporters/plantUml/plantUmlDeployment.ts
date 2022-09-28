@@ -13,7 +13,7 @@ export class PlantUmlDeployment extends PlantUmlObject {
 
     protected get header(): string {
         return `
-        Deployment_Node("${this.id}", "${escapeStr(
+        Boundary("${this.id}", "${escapeStr(
             this.deployment.title || '',
         )}", "Deployment", "${escapeStr(
             this.deployment.description || '',
