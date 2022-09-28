@@ -135,6 +135,7 @@ export class PlantUml extends PlantUmlObject {
                     const plantComponent = new PlantUmlComponent(
                         component.key,
                         component.get('component').value,
+                        component.value.namespace,
                     );
                     if (component.value.componentGroupName) {
                         const groupName = component.value.componentGroupName;

@@ -14,10 +14,12 @@ export interface DeploymentComponentDetailed {
     disabled?: boolean;
     name: string;
     externalConnections?: DeploymentExternalConnection[];
+    namespace?: string;
 }
 
 export interface DeploymentComponentFromGroup {
     fromGroup: string;
+    namespace?: string;
     disabled?: boolean;
 }
 

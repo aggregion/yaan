@@ -77,6 +77,7 @@ export interface GraphDeploymentGroup extends NodeWithOwnership {
             show: boolean;
             component: SolutionComponent;
             componentGroupName?: string;
+            namespace?: string;
             ports: Record<string, SolutionPort>;
         }
     >;
@@ -371,12 +372,20 @@ export const createGraph = (project: ProjectContainer) => {
                         string,
                         DeploymentExternalConnection[]
                     > = {};
+                    const componentNamespaces: Record<string, string> = {};
                     for (const compValue of dg.components) {
                         if (typeof compValue === 'string') {
                             if (compValue === '*') {
                                 Object.entries(solution.components).forEach(
                                     ([name, component]) => {
                                         componentsToDeploy[name] = component;
+                                        if (
+                                            dg.type === 'KubernetesCluster' &&
+                                            dg.clusterNamespace
+                                        ) {
+                                            componentNamespaces[name] =
+                                                dg.clusterNamespace;
+                                        }
                                     },
                                 );
                             } else {
@@ -387,6 +396,13 @@ export const createGraph = (project: ProjectContainer) => {
                                     );
                                 }
                                 componentsToDeploy[compValue] = val;
+                                if (
+                                    dg.type === 'KubernetesCluster' &&
+                                    dg.clusterNamespace
+                                ) {
+                                    componentNamespaces[compValue] =
+                                        dg.clusterNamespace;
+                                }
                             }
                         } else {
                             if (compValue.hasOwnProperty('fromGroup')) {
@@ -412,6 +428,10 @@ export const createGraph = (project: ProjectContainer) => {
                                         );
                                     }
                                     componentsToDeploy[compName] = val;
+                                    if (cv.namespace) {
+                                        componentNamespaces[compName] =
+                                            cv.namespace;
+                                    }
                                 }
                             } else {
                                 const cv =
@@ -429,6 +449,10 @@ export const createGraph = (project: ProjectContainer) => {
                                     if (cv.externalConnections) {
                                         componentConnections[cv.name] =
                                             cv.externalConnections;
+                                    }
+                                    if (cv.namespace) {
+                                        componentNamespaces[cv.name] =
+                                            cv.namespace;
                                     }
                                 }
                             }
@@ -459,6 +483,7 @@ export const createGraph = (project: ProjectContainer) => {
                                 componentGroupName:
                                     groupsMap[compName] &&
                                     groupsMap[compName].name,
+                                namespace: componentNamespaces[compName],
                                 ports: {},
                             });
                         for (const [portName, port] of Object.entries(ports)) {

@@ -6,6 +6,7 @@ export class PlantUmlComponent extends PlantUmlObject {
     constructor(
         public readonly id: string,
         public readonly component: SolutionComponent,
+        public readonly namespace?: string,
     ) {
         super(id);
     }
@@ -26,8 +27,8 @@ export class PlantUmlComponent extends PlantUmlObject {
         ${this.getContainerFigure()}("${this.id}", "${escapeStr(
             this.component.title || '',
         )}", "${escapeStr(
-            this.component.description || 'Component',
-        )}", "", "") {
+            this.namespace ? `Namespace: ${this.namespace}` : '-',
+        )}", "${escapeStr(this.component.description || 'Component')}", "") {
         `;
     }
 
