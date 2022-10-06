@@ -8,12 +8,4 @@ export class PlantUmlComponentGroup extends PlantUmlGroup {
     ) {
         super(id, GroupVisibility.HiddenIfEmpty, group.title);
     }
-
-    protected get header(): string {
-        return '';
-    }
-
-    protected get footer(): string {
-        return '';
-    }
 }
