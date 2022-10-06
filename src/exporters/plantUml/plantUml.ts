@@ -13,6 +13,7 @@ import { PlantUmlComponentGroup } from './plantUmlComponentGroup';
 import { PlantUmlOrganization } from './plantUmlOrganization';
 import { GroupVisibility, PlantUmlGroup } from './plantUmlGroup';
 import { LayoutDirection, PlantUmlLayout } from './plantUmlLayout';
+import { GraphNode } from '../../yaan/graph';
 
 interface Group {
     group: PlantUmlObject;
@@ -73,7 +74,7 @@ export class PlantUml extends PlantUmlObject {
                 infra.children.push(clusters, servers);
                 plantGroup.children.push(deployments, infra);
 
-                presObj.children.push(
+                /*presObj.children.push(
                     new PlantUmlLayout(
                         deployments.id,
                         infra.id,
@@ -86,7 +87,7 @@ export class PlantUml extends PlantUmlObject {
                         servers.id,
                         LayoutDirection.Down,
                     ),
-                );
+                );*/
                 if (parent) {
                     parent.children.push(plantGroup);
                 } else {
@@ -101,6 +102,7 @@ export class PlantUml extends PlantUmlObject {
                 return plantGroups[groupId];
             }
         };
+        let prevOrg: GraphNode<any> | null = null;
         pres.get('organizations').each((org) => {
             const plantOrg = new PlantUmlOrganization(
                 org.key,
@@ -108,6 +110,16 @@ export class PlantUml extends PlantUmlObject {
             );
             presObj.children.push(plantOrg);
             ensureGroup(new Set([org.key]), plantOrg);
+            if (prevOrg) {
+                presObj.children.push(
+                    new PlantUmlLayout(
+                        prevOrg.key,
+                        org.key,
+                        LayoutDirection.Down,
+                    ),
+                );
+            }
+            prevOrg = org;
         });
         pres.get('deployments').each((deployment) => {
             const plantDep = new PlantUmlDeployment(
@@ -145,7 +157,7 @@ export class PlantUml extends PlantUmlObject {
                                 .get(groupName);
                             const plantComponentGroup =
                                 new PlantUmlComponentGroup(
-                                    g.key,
+                                    group.key + g.key,
                                     g.value.group,
                                 );
                             componentGroups[groupName] = plantComponentGroup;
@@ -191,7 +203,7 @@ export class PlantUml extends PlantUmlObject {
             if (relationVal.type === RelationType.OwnedBy) {
                 return;
             }
-            let direction: RelationDirection = RelationDirection.None;
+            let direction: RelationDirection = RelationDirection.Up;
             switch (relationVal.type) {
                 case RelationType.DeployedOn:
                 case RelationType.ClusteredOn:
@@ -227,9 +239,8 @@ export class PlantUml extends PlantUmlObject {
         !include FONTAWESOME1/hdd_o.puml
         !include FONTAWESOME1/lock.puml
         !include DEVICONS/kubernetes.puml
-        skinparam linetype ortho
-        skinparam dpi 96
-        skinparam padding 32
+        skinparam nodesep 200   
+        skinparam ranksep 1000     
         skinparam rectangle<<organization>> {
           FontSize 64
         }
@@ -243,12 +254,9 @@ export class PlantUml extends PlantUmlObject {
         }
         
         skinparam arrow {
-          FontSize 8
+          FontSize 24
           FontColor grey
         }
-        
-        skinparam maxMessageSize 40
-
 
 
         
@@ -262,7 +270,7 @@ export class PlantUml extends PlantUmlObject {
 
         AddRelTag("fallback", $textColor="#c0c0c0", $lineColor="#438DD5")
         AddRelTag("uses-external", $textColor="#ff0000", $lineColor="#ff0000")
-        AddRelTag("uses-internal", $textColor="#3B3A2F", $lineColor="#3B3A2F")
+        AddRelTag("uses-internal", $textColor="#3B3A2F", $lineColor="#3B3A2F", $lineStyle=BoldLine())
         AddRelTag("deployed-on", $textColor="#3B3A2F", $lineColor="#3B3A2F")
         AddRelTag("clustered-on", $textColor="#3B3A2F", $lineColor="#3B3A2F")
 
