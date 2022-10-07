@@ -74,7 +74,7 @@ export class PlantUml extends PlantUmlObject {
                 infra.children.push(clusters, servers);
                 plantGroup.children.push(deployments, infra);
 
-                /*presObj.children.push(
+                presObj.children.push(
                     new PlantUmlLayout(
                         deployments.id,
                         infra.id,
@@ -87,7 +87,7 @@ export class PlantUml extends PlantUmlObject {
                         servers.id,
                         LayoutDirection.Down,
                     ),
-                );*/
+                );
                 if (parent) {
                     parent.children.push(plantGroup);
                 } else {
@@ -131,6 +131,7 @@ export class PlantUml extends PlantUmlObject {
                 plantDep,
             );
             // presObj.children.push(plantDep);
+            let prevGroup: PlantUmlDeploymentGroup | undefined;
             deployment.get('groups').each((group) => {
                 const plantGroup = new PlantUmlDeploymentGroup(
                     group.key,
@@ -138,8 +139,19 @@ export class PlantUml extends PlantUmlObject {
                     deployment.get('showDetails').value,
                 );
                 plantDep.children.push(plantGroup);
+                if (prevGroup) {
+                    presObj.children.push(
+                        new PlantUmlLayout(
+                            prevGroup.id,
+                            plantGroup.id,
+                            LayoutDirection.Right,
+                        ),
+                    );
+                }
+                prevGroup = plantGroup;
                 const componentGroups: Record<string, PlantUmlComponentGroup> =
                     {};
+                let prevCompGroup: PlantUmlObject | undefined;
                 group.get('components').each((component) => {
                     if (!component.value.show) {
                         return;
@@ -162,6 +174,16 @@ export class PlantUml extends PlantUmlObject {
                                 );
                             componentGroups[groupName] = plantComponentGroup;
                             plantGroup.children.push(plantComponentGroup);
+                            if (prevCompGroup) {
+                                presObj.children.push(
+                                    new PlantUmlLayout(
+                                        prevCompGroup.id,
+                                        plantComponentGroup.id,
+                                        LayoutDirection.Down,
+                                    ),
+                                );
+                            }
+                            prevCompGroup = plantComponentGroup;
                         }
                         componentGroups[groupName].children.push(
                             plantComponent,
@@ -239,7 +261,7 @@ export class PlantUml extends PlantUmlObject {
         !include FONTAWESOME1/hdd_o.puml
         !include FONTAWESOME1/lock.puml
         !include DEVICONS/kubernetes.puml
-        skinparam nodesep 200   
+        skinparam nodesep 100   
         skinparam ranksep 1000     
         skinparam rectangle<<organization>> {
           FontSize 64

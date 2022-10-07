@@ -20,7 +20,7 @@ export class PlantUmlDeploymentGroup extends PlantUmlObject {
             this.deploymentGroup.clusterNamespace
                 ? `Namespace: ${this.deploymentGroup.clusterNamespace}`
                 : ''
-        }", $tags="deploymentGroup${!this.showDetails ? ',hidden' : ''}"){
+        }", $tags="deploymentGroup${!this.showDetails ? '+hidden' : ''}"){
         `;
     }
 
