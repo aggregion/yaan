@@ -44,7 +44,7 @@ export class PlantUml extends PlantUmlObject {
             ownership: Set<string>,
             parent?: PlantUmlObject,
         ): Group => {
-            const groupId = Array.from(ownership).join(',\n') || 'commongroup';
+            const groupId = Array.from(ownership).join('Z') || 'commongroup';
             if (plantGroups[groupId]) {
                 return plantGroups[groupId];
             } else {
@@ -249,18 +249,9 @@ export class PlantUml extends PlantUmlObject {
     protected get header(): string {
         return `
         @startuml
-        !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
-        !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
-        !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
-        !define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
-        !define FONTAWESOME1 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome
-        !define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons2
-        !include FONTAWESOME/server.puml
-        !include FONTAWESOME/envelope.puml
-        !include FONTAWESOME1/microchip.puml
-        !include FONTAWESOME1/hdd_o.puml
-        !include FONTAWESOME1/lock.puml
-        !include DEVICONS/kubernetes.puml
+        
+        ${this.printIncludes()}
+        
         skinparam nodesep 100   
         skinparam ranksep 1000     
         skinparam rectangle<<organization>> {
@@ -273,11 +264,11 @@ export class PlantUml extends PlantUmlObject {
         
         skinparam rectangle<<container>> {
           FontSize 16
+          FontColor black
         }
         
         skinparam arrow {
           FontSize 24
-          FontColor grey
         }
 
 
@@ -290,11 +281,10 @@ export class PlantUml extends PlantUmlObject {
         AddElementTag("server", $shape=RoundedBoxShape(), $bgColor="#ebffee")  
 
 
-        AddRelTag("fallback", $textColor="#c0c0c0", $lineColor="#438DD5")
-        AddRelTag("uses-external", $textColor="#ff0000", $lineColor="#ff0000")
-        AddRelTag("uses-internal", $textColor="#3B3A2F", $lineColor="#3B3A2F", $lineStyle=BoldLine())
-        AddRelTag("deployed-on", $textColor="#3B3A2F", $lineColor="#3B3A2F")
-        AddRelTag("clustered-on", $textColor="#3B3A2F", $lineColor="#3B3A2F")
+        AddRelTag("uses-external", $lineStyle=DashedLine())
+        AddRelTag("uses-internal", $lineStyle=BoldLine())
+        AddRelTag("deployed-on", $lineStyle=DottedLine())
+        AddRelTag("clustered-on", $lineStyle=DottedLine())
 
         
         WithoutPropertyHeader()
@@ -306,5 +296,15 @@ export class PlantUml extends PlantUmlObject {
         return `
         @enduml
         `;
+    }
+
+    protected get includes(): Set<string> {
+        return new Set([
+            '<C4/C4>',
+            '<C4/C4_Container>',
+            '<C4/C4_Component>',
+            '<C4/C4_Deployment>',
+            '<C4/C4_Context>',
+        ]);
     }
 }
