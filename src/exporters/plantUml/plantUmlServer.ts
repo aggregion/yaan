@@ -7,6 +7,7 @@ import {
     ServerFirewallRule,
 } from '../../yaan/schemas/server';
 import { escapeStr } from './helpers';
+import { icons } from './icons';
 
 export class PlantUmlServer extends PlantUmlObject {
     constructor(
@@ -21,23 +22,22 @@ export class PlantUmlServer extends PlantUmlObject {
         if (!this.showDetails) {
             return '';
         }
-        if (this.server.hardware?.cpus) {
-            const cpusStr = this.server.hardware?.cpus
-                .map(
-                    (cpu: ServerCpu, i: number) => `
+        const cpus = this.server.hardware?.cpus || [{}];
+        const cpusStr = cpus
+            .map(
+                (cpu: ServerCpu, i: number) => `
                 Deployment_Node("${this.id}/cpus/${i}", "CPU #${i}", "${
-                        cpu.model || ''
-                    }", "${cpu.cores ? cpu.cores + ' cores' : ''}"){
+                    cpu.model || ''
+                }", "${cpu.cores ? cpu.cores + ' cores' : ''}"){
                 }
             `,
-                )
-                .join('\n');
-            return `
-            Deployment_Node("${this.id}/cpus", "CPUs", "", "", "microchip"){
+            )
+            .join('\n');
+        return `
+            Deployment_Node("${this.id}/cpus", "CPUs", "", "", $sprite="microchip"){
             ${cpusStr}
             }
             `;
-        }
         return '';
     }
 
@@ -45,23 +45,22 @@ export class PlantUmlServer extends PlantUmlObject {
         if (!this.showDetails) {
             return '';
         }
-        if (this.server.hardware?.disks) {
-            const str = this.server.hardware?.disks
-                .map(
-                    (disk: ServerDisk, i: number) => `
+        const disks = this.server.hardware?.disks || [{}];
+        const str = disks
+            .map(
+                (disk: ServerDisk, i: number) => `
                 Deployment_Node("${this.id}/disks/${i}", "${
-                        disk.devPath || ''
-                    }", "${disk.size || ''}"){
+                    disk.devPath || ''
+                }", "${disk.size || ''}"){
                 }
             `,
-                )
-                .join('\n');
-            return `
-            Deployment_Node("${this.id}/disks", "Disks", "", "", "hdd_o"){
+            )
+            .join('\n');
+        return `
+            Deployment_Node("${this.id}/disks", "Disks", "", "", $sprite="${icons.hdd}"){
             ${str}
             }
             `;
-        }
         return '';
     }
 
@@ -178,7 +177,7 @@ export class PlantUmlServer extends PlantUmlObject {
             this.showDetails ? escapeStr(this.server.title) : '***'
         }", "Server", "${
             this.server.description || ''
-        }", $sprite=server, $tags="server${
+        }", $sprite="server_generic", $tags="server${
             !this.showDetails ? '+hidden' : ''
         }"){
           ${this.renderCpus()}
