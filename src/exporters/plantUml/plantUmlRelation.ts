@@ -51,9 +51,11 @@ export class PlantUmlRelation extends PlantUmlObject {
         }", $textColor="${color}", $lineColor="${color}")
         Rel${this.direction ? '_' + this.direction : ''}("${this.fromKey}", "${
             this.toKey
-        }", "${escapeStr(this.title || ' ')}", $tags="${this.fromKey}+${
-            this.type
-        }")
+        }", "${
+            '\t\t'.repeat(parseInt(hash.slice(0, 1), 16)) +
+            escapeStr(this.title || ' ') +
+            '\t\t'.repeat(parseInt(hash.slice(1, 2), 16))
+        }", $tags="${this.fromKey}+${this.type}")
         `;
     }
 
