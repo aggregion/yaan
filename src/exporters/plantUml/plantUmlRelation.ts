@@ -1,5 +1,6 @@
 import { PlantUmlObject } from './plantUmlObject';
 import { escapeStr } from './helpers';
+import * as crypto from 'crypto';
 
 export enum RelationDirection {
     None = '',
@@ -10,31 +11,23 @@ export enum RelationDirection {
     Neighbor = 'Neighbor',
 }
 
-const contrastColors = [
-    '#20A811',
-    '#2F18F5',
-    '#1BF501',
-    '#F57018',
-    '#A84300',
+const getUniqueColor = (n: number) => {
+    const rgb = [0, 0, 0];
 
-    '#A8A411',
-    '#00A1F5',
-    '#F5EE00',
-    '#F51828',
-    '#A8000C',
+    for (let i = 0; i < 24; i++) {
+        rgb[i % 3] <<= 1;
+        rgb[i % 3] |= n & 0x01;
+        n >>= 1;
+    }
 
-    '#A88111',
-    '#01F5B3',
-    '#F5B600',
-    '#DC18F5',
-    '#9600A8',
-
-    '#3941A8',
-    '#F5956C',
-    '#6D76F5',
-    '#87F553',
-    '#9FAB9A',
-];
+    return (
+        '#' +
+        rgb.reduce(
+            (a, c) => (c > 0x0f ? c.toString(16) : '0' + c.toString(16)) + a,
+            '',
+        )
+    );
+};
 
 export class PlantUmlRelation extends PlantUmlObject {
     constructor(
@@ -48,17 +41,19 @@ export class PlantUmlRelation extends PlantUmlObject {
     }
 
     protected get header(): string {
-        const color =
-            contrastColors[Math.trunc(Math.random() * contrastColors.length)];
+        const md5 = crypto.createHash('md5');
+        md5.update(this.fromKey);
+        const hash = md5.digest('hex');
+        const color = getUniqueColor(parseInt(hash.slice(0, 4), 16));
         return `
+        AddRelTag("${
+            this.fromKey
+        }", $textColor="${color}", $lineColor="${color}")
         Rel${this.direction ? '_' + this.direction : ''}("${this.fromKey}", "${
             this.toKey
         }", "${escapeStr(this.title || ' ')}", $tags="${this.fromKey}+${
             this.type
         }")
-        AddRelTag("${
-            this.fromKey
-        }", $textColor="${color}", $lineColor="${color}")
         `;
     }
 
