@@ -281,7 +281,7 @@ export class PlantUml extends PlantUmlObject {
         AddElementTag("server", $shape=RoundedBoxShape(), $bgColor="#ebffee")  
 
 
-        AddRelTag("uses-external", $lineStyle=DashedLine())
+        AddRelTag("uses-external", $lineStyle=BoldLine())
         AddRelTag("uses-internal", $lineStyle=BoldLine())
         AddRelTag("deployed-on", $lineStyle=DottedLine())
         AddRelTag("clustered-on", $lineStyle=DottedLine())
