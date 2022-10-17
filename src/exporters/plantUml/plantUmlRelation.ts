@@ -42,7 +42,7 @@ export class PlantUmlRelation extends PlantUmlObject {
 
     protected get header(): string {
         const md5 = crypto.createHash('md5');
-        md5.update(this.fromKey);
+        md5.update(this.fromKey + '$' + this.toKey);
         const hash = md5.digest('hex');
         const color = getUniqueColor(parseInt(hash.slice(0, 4), 16));
         return `
