@@ -326,15 +326,32 @@ export const createGraph = (project: ProjectContainer) => {
                         }
                         dgContainer = gunServer;
                         break;
+                    case 'External':
+                        if (dg.owner) {
+                            const org = getFromProject(
+                                'organizations',
+                                dg.owner,
+                            );
+                            const gunOrg = gunPres
+                                .get('organizations')
+                                .get(dg.owner)
+                                .put({
+                                    organization: org,
+                                });
+                            affixOwnership(gunOrg, gunDg, gunDep);
+                        }
+                        break;
                 }
-                gunPres.get('relations').set({
-                    src: gunDg,
-                    dest: dgContainer,
-                    type: RelationType.DeployedOn,
-                    props: {
-                        description: 'Deployed on',
-                    },
-                });
+                if (dgContainer) {
+                    gunPres.get('relations').set({
+                        src: gunDg,
+                        dest: dgContainer,
+                        type: RelationType.DeployedOn,
+                        props: {
+                            description: 'Deployed on',
+                        },
+                    });
+                }
                 const solution = getFromProject('solutions', dg.solution);
                 if (dg.components) {
                     const groupsMap: Record<

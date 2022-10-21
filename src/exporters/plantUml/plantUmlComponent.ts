@@ -8,6 +8,7 @@ export class PlantUmlComponent extends PlantUmlObject {
         public readonly id: string,
         public readonly component: SolutionComponent,
         public readonly namespace?: string,
+        public readonly external = false,
     ) {
         super(id);
     }
@@ -20,14 +21,19 @@ export class PlantUmlComponent extends PlantUmlObject {
     }
 
     private getContainerFigure() {
+        let fig = 'Container';
         switch (this.component.kind) {
             case 'db':
-                return 'ContainerDb';
+                fig = 'ContainerDb';
+                break;
             case 'queue':
-                return 'ContainerQueue';
-            default:
-                return 'Container';
+                fig = 'ContainerQueue';
+                break;
         }
+        if (this.external) {
+            fig += '_Ext';
+        }
+        return fig;
     }
 
     protected get header(): string {

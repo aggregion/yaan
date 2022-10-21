@@ -39,6 +39,9 @@ export class PlantUml extends PlantUmlObject {
         );
         this.children.push(presObj);
 
+        const layouts: PlantUmlObject[] = [];
+        const relations: PlantUmlRelation[] = [];
+
         const plantGroups: Record<string, Group> = {};
         const ensureGroup = (
             ownership: Set<string>,
@@ -73,15 +76,14 @@ export class PlantUml extends PlantUmlObject {
                 );
                 infra.children.push(clusters, servers);
                 plantGroup.children.push(deployments, infra);
-
-                presObj.children.push(
+                layouts.push(
                     new PlantUmlLayout(
                         deployments.id,
                         infra.id,
                         LayoutDirection.Down,
                     ),
                 );
-                presObj.children.push(
+                layouts.push(
                     new PlantUmlLayout(
                         clusters.id,
                         servers.id,
@@ -111,7 +113,7 @@ export class PlantUml extends PlantUmlObject {
             presObj.children.push(plantOrg);
             ensureGroup(new Set([org.key]), plantOrg);
             if (prevOrg) {
-                presObj.children.push(
+                layouts.push(
                     new PlantUmlLayout(
                         prevOrg.key,
                         org.key,
@@ -133,6 +135,8 @@ export class PlantUml extends PlantUmlObject {
             // presObj.children.push(plantDep);
             let prevGroup: PlantUmlDeploymentGroup | undefined;
             deployment.get('groups').each((group) => {
+                const external =
+                    group.value.deploymentGroup.type === 'External';
                 const plantGroup = new PlantUmlDeploymentGroup(
                     group.key,
                     group.get('deploymentGroup').value,
@@ -140,7 +144,7 @@ export class PlantUml extends PlantUmlObject {
                 );
                 plantDep.children.push(plantGroup);
                 if (prevGroup) {
-                    presObj.children.push(
+                    layouts.push(
                         new PlantUmlLayout(
                             prevGroup.id,
                             plantGroup.id,
@@ -160,6 +164,7 @@ export class PlantUml extends PlantUmlObject {
                         component.key,
                         component.get('component').value,
                         component.value.namespace,
+                        external,
                     );
                     if (component.value.componentGroupName) {
                         const groupName = component.value.componentGroupName;
@@ -175,7 +180,7 @@ export class PlantUml extends PlantUmlObject {
                             componentGroups[groupName] = plantComponentGroup;
                             plantGroup.children.push(plantComponentGroup);
                             if (prevCompGroup) {
-                                presObj.children.push(
+                                layouts.push(
                                     new PlantUmlLayout(
                                         prevCompGroup.id,
                                         plantComponentGroup.id,
@@ -228,6 +233,8 @@ export class PlantUml extends PlantUmlObject {
             let direction: RelationDirection = RelationDirection.Up;
             switch (relationVal.type) {
                 case RelationType.DeployedOn:
+                    direction = RelationDirection.None;
+                    break;
                 case RelationType.ClusteredOn:
                     direction = RelationDirection.Neighbor;
                     break;
@@ -242,8 +249,10 @@ export class PlantUml extends PlantUmlObject {
                 direction,
                 relationVal.props?.description,
             );
-            presObj.children.push(plantRel);
+            relations.push(plantRel);
         });
+        presObj.children.push(...layouts);
+        presObj.children.push(...relations);
     }
 
     protected get header(): string {
@@ -254,8 +263,11 @@ export class PlantUml extends PlantUmlObject {
         
         skinparam nodesep 100   
         skinparam ranksep 1000     
+        
+
         skinparam rectangle<<organization>> {
           FontSize 64
+          BackgroundColor white
         }
         
         skinparam rectangle<<visibleGroup>> {
@@ -268,7 +280,26 @@ export class PlantUml extends PlantUmlObject {
         }
         
         skinparam arrow {
-          FontSize 24
+          FontSize 16
+        }
+        
+        skinparam rectangle<<deployment>> {
+          FontSize 32
+          BackgroundColor #e8e8e8
+        }
+        
+        skinparam rectangle<<deploymentGroup>> {
+          FontSize 32
+          BackgroundColor #d4d4d4
+        }
+        
+        skinparam rectangle<<componentGroup>> {
+          FontSize 32
+          BackgroundColor #e6e6e6
+        }
+        
+        skinparam rectangle<<presentation>> {
+          FontSize 72
         }
 
 
@@ -283,8 +314,6 @@ export class PlantUml extends PlantUmlObject {
 
         AddRelTag("uses-external", $lineStyle=BoldLine())
         AddRelTag("uses-internal", $lineStyle=BoldLine())
-        AddRelTag("deployed-on", $lineStyle=DottedLine())
-        AddRelTag("clustered-on", $lineStyle=DottedLine())
 
         
         WithoutPropertyHeader()

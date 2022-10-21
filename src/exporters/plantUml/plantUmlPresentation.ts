@@ -13,7 +13,7 @@ export class PlantUmlPresentation extends PlantUmlObject {
     protected get header(): string {
         return `Deployment_Node("${this.id}", "${escapeStr(
             this.presentation.title,
-        )}", ""){`;
+        )}", "", $tags="presentation"){`;
     }
 
     protected get footer(): string {
