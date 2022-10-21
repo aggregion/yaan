@@ -6,6 +6,8 @@ export class PlantUmlComponentGroup extends PlantUmlGroup {
         public readonly id: string,
         public readonly group: SolutionComponentGroup,
     ) {
-        super(id, GroupVisibility.HiddenIfEmpty, group.title);
+        super(id, GroupVisibility.HiddenIfEmpty, group.title, [
+            'componentGroup',
+        ]);
     }
 }

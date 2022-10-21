@@ -186,6 +186,9 @@
         },
         {
           "$ref": "#/definitions/ServerDeploymentGroup"
+        },
+        {
+          "$ref": "#/definitions/ExternalDeploymentGroup"
         }
       ]
     },
@@ -201,6 +204,35 @@
         "Person"
       ],
       "type": "string"
+    },
+    "ExternalDeploymentGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "components": {
+          "items": {
+            "$ref": "#/definitions/DeploymentComponent"
+          },
+          "type": "array"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "solution": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "const": "External",
+          "type": "string"
+        }
+      },
+      "required": [
+        "solution",
+        "type"
+      ],
+      "type": "object"
     },
     "IPInterface": {
       "additionalProperties": false,

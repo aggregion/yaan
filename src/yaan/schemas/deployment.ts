@@ -49,9 +49,15 @@ export interface ServerDeploymentGroup extends CommonDeploymentGroupProps {
     method?: string;
 }
 
+export interface ExternalDeploymentGroup extends CommonDeploymentGroupProps {
+    type: 'External';
+    owner?: string;
+}
+
 export type DeploymentGroup =
     | KubernetesClusterDeploymentGroup
-    | ServerDeploymentGroup;
+    | ServerDeploymentGroup
+    | ExternalDeploymentGroup;
 
 export interface Deployment {
     title: string;
